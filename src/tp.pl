@@ -10,7 +10,7 @@ persona(lernen,  auberst, 1315, humano).
 persona(frieren, weise,    100, elfo).
 persona(eisen,   riegel,  1150, enano).
 
-% punto 1-a
+% punto 1
 
 esperanzaDeVida(enano,350).
 esperanzaDeVida(humano,85).
@@ -26,7 +26,64 @@ estaVivoEnAnio(Persona,Anio):-
     Anio >= AnioNacimiento.
     sigueVivo(Anio,AnioNacimiento,EsperanzaDeVida).
 
+% punto 2
 
+conocioHazania(
+    wirbel,
+    1390,
+    presencio,
+    hazania(rescatarHermanaDeWirbel, klares, [stark, fern])
+).
+
+conocioHazania(
+    frieren,
+    1390,
+    presencio,
+    hazania(rescatarHermanaDeWirbel, klares, [stark, fern])
+).
+
+conocioHazania(
+    lawine,
+    1393,
+    escucho(cancion),
+    hazania(destruirDemonioAura, weise, [frieren])
+).
+
+conocioHazania(
+    voll,
+    1400,
+    leyo(paginas(50)),
+    hazania(destruirDemonioAura, auberst, [denken])
+).
+
+conocioHazania(
+    serie,
+    1335,
+    leyo(paginas(100)),
+    hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen])
+).
+
+conocioHazania(
+    kanne,
+    1375,
+    presencio,
+    hazania(recuperarGatoPerdido, weise, [himmel, frieren])
+).
+
+cuantoAniosRecuerdaHazania(presencio, siempre).
+cuantoAniosRecuerdaHazania(escucho, 15).
+cuantoAniosRecuerdaHazania(leyo(paginas(CantPaginas)), CantPaginas).
+
+todaviaLoRecueda(_, siempre, _).
+todaviaLoRecueda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio):-
+    number(CuantosAniosLaRecuerda),                                    % agrego esto porque cuando hace backtracking y lo recuerda siempre tira error
+    Anio =< CuandoLaConocio + CuantosAniosLaRecuerda.
+
+recuerdaHazaniaEnAnio(Persona, Hazania, Anio):-
+    conocioHazania(Persona, CuandoLaConocio, ComoLaConocio, Hazania),
+    Anio >= CuandoLaConocio,
+    cuantoAniosRecuerdaHazania(ComoLaConocio, CuantosAniosLaRecuerda),
+    todaviaLoRecueda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio).
 
 :- begin_tests(tpIntegrador, []).
 
