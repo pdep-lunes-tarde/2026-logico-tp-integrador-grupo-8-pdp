@@ -176,7 +176,15 @@ esConmemorada(hazania(destrirSchlatElOmniscente, ende, [heroeDelSur]),
 
 conmemoraConFestividad(NombreHazania, Pueblo, AnioDesde):-
     esConmemorada(hazania(NombreHazania, _, _), Pueblo, diaFestivo(AnioDesde)).
+% Revisa si alguno de los anios de mantenimiento está dentro de la distancia dada. Asume que la lista de anios de mantenimiento está ordenada de menor a mayor.
+mantenimientoReciente(AnioActual,[AnioMantenimiento],Distancia):-
+    AnioActual>=AnioMantenimiento, AnioActual-AnioMantenimiento =< Distancia.
 
+mantenimientoReciente(AnioActual,[X|Xs],Distancia):-
+    AnioActual>=X,
+    AnioActual-X =< Distancia;
+    mantenimientoReciente(AnioActual,Xs,Distancia).
+    
 estaEnBuenEstado(estatua(AnioDesde, marmol, []), AnioActual):- 
 %Dejo una lista vacia en anios de mantenimiento, 
 %porque si hay una estatua reciente sin mantenimiento 
@@ -184,16 +192,28 @@ estaEnBuenEstado(estatua(AnioDesde, marmol, []), AnioActual):-
 %puede romper por acceder a una lista vacia/ usar <= con una variable libre
     AnioActual - AnioDesde =< 30.
 
+% Este código no funcionaba correctamente, si el mantenimiento no había ocurrido todavía la estatua estaba en buen estado, un absurdo.
+%estaEnBuenEstado(estatua(_, marmol, AniosMantenimiento), AnioActual):-
+%    max_member(UltimoMantenimiento, AniosMantenimiento),
+%    AnioActual - UltimoMantenimiento =< 30.
+
+%estaEnBuenEstado(estatua(AnioDesde, bronce, []), AnioActual):-
+%    AnioActual - AnioDesde =< 15.
+
+%estaEnBuenEstado(estatua(_, bronce, AniosMantenimiento), AnioActual):-
+%    max_member(UltimoMantenimiento, AniosMantenimiento),
+%    AnioActual - UltimoMantenimiento =< 15.
+
+
 estaEnBuenEstado(estatua(_, marmol, AniosMantenimiento), AnioActual):-
-    max_member(UltimoMantenimiento, AniosMantenimiento),
-    AnioActual - UltimoMantenimiento =< 30.
+    mantenimientoReciente(AnioActual,AniosMantenimiento,30).
 
 estaEnBuenEstado(estatua(AnioDesde, bronce, []), AnioActual):-
-    AnioActual - AnioDesde =< 15.
+    AnioActual>AnioDesde,AnioActual - AnioDesde =< 15.
 
 estaEnBuenEstado(estatua(_, bronce, AniosMantenimiento), AnioActual):-
-    max_member(UltimoMantenimiento, AniosMantenimiento),
-    AnioActual - UltimoMantenimiento =< 15.
+    mantenimientoReciente(AnioActual,AniosMantenimiento,15).
+
 
 conmemoraConEstatuaEnBuenEstado(NombreHazania, Pueblo, AnioActual):-
     esConmemorada(hazania(NombreHazania, _, _), Pueblo, estatua(AnioDesde, Material, AniosMantenimiento)),
@@ -232,5 +252,9 @@ conmemoraConEstatuaEnBuenEstado(NombreHazania, Pueblo, AnioActual):-
     test("Una hazania pasa al olvido en un determinado anio si ya nadie la recuerda en dicho anio", nondet):-
         pasoAlOlvido(destruirDemonioAura, 1460),
         not(pasoAlOlvido(destruirDemonioAura, 1440)).
-        
+    test("Una persona conocio una hazania si donde vive hay alguna estatua que conmemore la hazania. Es recordada si la estatua sigue en buen estado.",nondet):-
+        recuerdaHazaniaEnAnio(lawine,destruirReyDemonio,1400),
+        not(recuerdaHazaniaEnAnio(lawine, destruirReyDemonio,1390)),
+        recuerdaHazaniaEnAnio(fern,destruirReyDemonio,1400).
+
 :- end_tests(tpIntegrador).
