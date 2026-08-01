@@ -163,7 +163,7 @@ recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
 /*
 El predicado recuerdaHazaniaEnAnio solo es inversible respecto de la persona y la hazaña, pero no del año.
 Siempre tiene que verificar que el año recibido supere al año en que conocio la hazaña, ademas tambien
-usa estaVivoEnAnio, qu tampoco es inversible respecto del año
+usa estaVivoEnAnio, que tampoco es inversible respecto del año
 
 No podemos solucionarlo con between porque hay hazañas que recuerdan para siempre, no tiene cota superior
 Se podria solucionar poniendo nosotros una cota superior pero no creemos que sea el objetivo
@@ -183,8 +183,6 @@ recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
 conmemoraConEstatuaEnBuenEstado(NombreHazania, Pueblo, AnioActual):-
     esConmemorada(hazania(NombreHazania, _, _), Pueblo, estatua(AnioDesde, Material, AniosMantenimiento)),
     estaEnBuenEstado(estatua(AnioDesde, Material, AniosMantenimiento), AnioActual).
-
-%Predicado que indica si una estatua se encuentra en buen estado en un determinado año
 
 % Predicado aux mantenimientoReciente
 %% Revisa si alguno de los anios de mantenimiento está dentro de la distancia dada. Asume que la lista de anios de mantenimiento está ordenada de menor a mayor.
@@ -224,7 +222,7 @@ estaEnBuenEstado(estatua(_, bronce, AniosMantenimiento), AnioActual):-
 
 % 2-b
 
-%Hay una sola version
+%Predicado auxiliar
 
 hayMultiplesVersiones(NombreHazania):-
     persona(Persona1, _, _, _),
@@ -233,12 +231,14 @@ hayMultiplesVersiones(NombreHazania):-
     conocioHazania(Persona1, _, _, hazania(NombreHazania, _, _)),
     conocioHazania(Persona2, _, _, hazania(NombreHazania, _, _)).
 
+%Caso en el que hay una unica version
+
 estaCorroborada(NombreHazania):-
     conocioHazania(_, _, _, hazania(NombreHazania, _, _)),
     not(hayMultiplesVersiones(NombreHazania)).
 
 
-%Hay 2 personas distintas con la misma version
+%Caso en el que hay 2 personas distintas con la misma version
 
 estaCorroborada(NombreHazania):-
     persona(Persona1, _, _, _),
@@ -264,7 +264,7 @@ esConmemorada(hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]
 esConmemorada(hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
                 auberst, estatua(1370, bronce, [1400, 1450])).
         
-esConmemorada(hazania(destrirSchlatElOmniscente, ende, [heroeDelSur]),
+esConmemorada(hazania(destruirSchlatElOmniscente, ende, [heroeDelSur]),
                 auberst, estatua(1340, marmol, [1410])).
 
 
