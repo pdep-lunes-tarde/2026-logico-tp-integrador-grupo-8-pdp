@@ -22,25 +22,18 @@ esperanzaDeVida(enano,350).
 esperanzaDeVida(humano,85).
 esperanzaDeVida(elfo,infinito).
 
-sigueVivo(_ ,_,infinito).
-sigueVivo(Anio ,AnioNacimiento,EsperanzaDeVida):-
-    number(EsperanzaDeVida), %Esto da false cuando recibe algo que no es un numero. Evita que se sume el literal "infinito"
-    Anio =< (AnioNacimiento + EsperanzaDeVida).
+sigueVivo(Anio,AnioNacimiento,infinito):-
+    between(AnioNacimiento, inf, Anio).
+    
+sigueVivo(Anio,AnioNacimiento,EsperanzaDeVida):-
+    EsperanzaDeVida \= infinito,
+    AnioMuerte is AnioNacimiento+EsperanzaDeVida,
+    between(AnioNacimiento, AnioMuerte, Anio).
 
 estaVivoEnAnio(NombreDePersona,Anio):-
     persona(NombreDePersona,_,AnioNacimiento,Raza),
     esperanzaDeVida(Raza, EsperanzaDeVida),
-    Anio >= AnioNacimiento,
     sigueVivo(Anio,AnioNacimiento,EsperanzaDeVida).
-
-/*
-El predicado estaVivoEnAnio solo es inversible respecto de la persona, pero no del año.
-Siempre tiene que verificar que el año recibido supere el año de nacimiento de la persona
-No podemos solucionarlo con between porque hay personas que viven infinitamente, no tiene cota superior
-Se podria solucionar poniendo nosotros una cota superior pero no creemos que sea el objetivo
-*/
-
-
 
 
 %conocioHazania(NombreDePersona, AnioDesde, Presencio/Escucho/Leyo, Hazania)
@@ -147,28 +140,20 @@ cuantoAniosRecuerdaHazania(porDiaFestivo, siempre).
 
 
 %2-a
-%todaviaLoRecuerda(CuandoLaConocio, CuantosAniosLaRecuerda, AnioConsultado)
-todaviaLoRecueda(_, siempre, _).
+%todaviaLoRecuerda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio)
+todaviaLoRecueda(CuandoLaConocio, siempre, Anio):-
+    between(CuandoLaConocio, inf, Anio).
+
 todaviaLoRecueda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio):-
-    number(CuantosAniosLaRecuerda), %Esto da false cuando recibe algo que no es un numero. Evita que se sume el literal "siempre"
-    Anio =< CuandoLaConocio + CuantosAniosLaRecuerda.
+    CuantosAniosLaRecuerda \= siempre,
+    CuandoLoOlvida is CuandoLaConocio + CuantosAniosLaRecuerda,
+    between(CuandoLaConocio, CuandoLoOlvida, Anio).
 
 recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
     conocioHazania(Persona, CuandoLaConocio, ComoLaConocio, hazania(NombreHazania,_,_)),
-    Anio >= CuandoLaConocio,
+    estaVivoEnAnio(Persona,Anio),
     cuantoAniosRecuerdaHazania(ComoLaConocio, CuantosAniosLaRecuerda),
-    todaviaLoRecueda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio),
-    estaVivoEnAnio(Persona,Anio).
-
-/*
-El predicado recuerdaHazaniaEnAnio solo es inversible respecto de la persona y la hazaña, pero no del año.
-Siempre tiene que verificar que el año recibido supere al año en que conocio la hazaña, ademas tambien
-usa estaVivoEnAnio, que tampoco es inversible respecto del año
-
-No podemos solucionarlo con between porque hay hazañas que recuerdan para siempre, no tiene cota superior
-Se podria solucionar poniendo nosotros una cota superior pero no creemos que sea el objetivo
-*/
-
+    todaviaLoRecueda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio).
 
 %3-b
 recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
@@ -177,7 +162,6 @@ recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
     estaVivoEnAnio(Persona,Anio),
     persona(Persona, Pueblo, _, _),
     conmemoraConEstatuaEnBuenEstado(NombreHazania, Pueblo, Anio).
-
 
 %Predicado aux para mas expresividad
 conmemoraConEstatuaEnBuenEstado(NombreHazania, Pueblo, AnioActual):-
