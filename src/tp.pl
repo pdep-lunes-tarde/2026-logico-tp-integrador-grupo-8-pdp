@@ -82,6 +82,7 @@ conocioHazania(
     hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen])
 ).
 
+
 conocioHazania(
     kanne,
     1375,
@@ -226,27 +227,16 @@ estaEnBuenEstado(estatua(_, bronce, AniosMantenimiento), AnioActual):-
 
 %Hay una sola version
 
-hayMultiplesVersiones(NombreHazania):-
-    persona(Persona1, _, _, _),
-    persona(Persona2, _, _, _),
-    Persona1\=Persona2,
-    conocioHazania(Persona1, _, _, hazania(NombreHazania, _, _)),
-    conocioHazania(Persona2, _, _, hazania(NombreHazania, _, _)).
-
-estaCorroborada(NombreHazania):-
-    conocioHazania(_, _, _, hazania(NombreHazania, _, _)),
-    not(hayMultiplesVersiones(NombreHazania)).
-
-
-%Hay 2 personas distintas con la misma version
-
-estaCorroborada(NombreHazania):-
-    persona(Persona1, _, _, _),
-    persona(Persona2, _, _, _),
-    Persona1\=Persona2,
-    conocioHazania(Persona1, _, _, hazania(NombreHazania, Donde, Quienes)),
-    conocioHazania(Persona2, _, _, hazania(NombreHazania, Donde, Quienes)).
-
+% compara con el resto de personas que que conocen hazanias con el mismo nombre y se evalua si ocurren en el mismo lugar y tienen los mismos participantes.
+estaCorroborada(NombreHazania) :-
+    conocioHazania(_, _, _, hazania(NombreHazania, Donde1, Quienes1)),
+    forall(                                                                  
+        conocioHazania(_, _, _, hazania(NombreHazania, Donde2, Quienes2)),   
+        (
+            Donde1 == Donde2,
+            Quienes1 == Quienes2
+        )
+    ).
 
 % 2 - c
 pasoAlOlvido(NombreHazania, Anio):-
@@ -292,7 +282,7 @@ esConmemorada(hazania(destrirSchlatElOmniscente, ende, [heroeDelSur]),
         estaCorroborada(rescatarHermanaDeWirbel),   %Las versiones de frieren y wirbel coinciden
         not(estaCorroborada(destruirDemonioAura)),  %Las versiones de lawine y voll difieren
         estaCorroborada(recuperarGatoPerdido),      %Hay una sola version
-        estaCorroborada(destruirReyDemonio).        %Hay una sola version
+        not(estaCorroborada(destruirReyDemonio)).        %La version  de Serie y del pueblo de weise son distintas
 
     test("Una hazania pasa al olvido en un determinado anio si ya nadie la recuerda en dicho anio", nondet):-
         pasoAlOlvido(destruirDemonioAura, 1460),
