@@ -353,6 +353,132 @@ esConmemorada(
 
 
 
+
+%%%   ------------------    Parte 2       --------------------
+
+conocioHazania(
+    kanne,
+    1335,
+    leyo(paginas(350)),
+    hazania(hazania1, ende, [serie, denken])
+).
+
+conocioHazania(
+    kanne,
+    1335,
+    leyo(paginas(10)),
+    hazania(hazania3, auberst, [serie, denken])
+).
+
+conocioHazania(
+    fern,
+    1335,
+    leyo(paginas(50)),
+    hazania(hazania2, ende, [denken])
+).
+
+
+
+conocioHazania(
+    serie,
+    1335,
+    escuchoCancion,
+    hazania(hazania5, ende, [denken])
+).
+
+conocioHazania(
+    fern,
+    1335,
+    presencio,
+    hazania(destruirReyDemonio, ende, [denken])
+).
+
+conocioHazania(
+    fern,
+    1335,
+    escuchoCancion,
+    hazania(hazania6, ende, [denken])
+).
+
+
+
+
+esPueblo(auberst).
+esPueblo(ende).
+esPueblo(weise).
+esPueblo(riegel).
+esPueblo(klares).
+
+% I )
+puebloRecuerdaHazaniaEnAnio(NombreHazania, Pueblo, Anio):-
+    persona(Persona, Pueblo, AnioNacimiento, _),
+    recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio).
+% II ) 
+leyeronPaginasEnAnio(Pueblo, Total, Anio):-
+    esPueblo(Pueblo),
+    findall(
+        CantPaginas ,
+        conocioHazania(_, Anio, leyo(paginas(CantPaginas)),hazania(_, Pueblo, _)),
+        ListaCantPag
+        ),
+    sum_list(ListaCantPag, Total).
+% III)
+puebloLeeMasQueOtro(Pueblo1, Pueblo2, Anio):-
+    esPueblo(Pueblo1),
+    esPueblo(Pueblo2),
+    leyeronPaginasEnAnio(Pueblo1, Total1, Anio),
+    leyeronPaginasEnAnio(Pueblo2, Total2, Anio),
+    Total1 > Total2.
+
+puebloQueMasLeeEnAnio(Pueblo, Anio):-
+    esPueblo(Pueblo),
+    forall(
+        ( esPueblo(OtroPueblo), OtroPueblo \=  Pueblo ),
+        puebloLeeMasQueOtro(Pueblo,OtroPueblo,Anio)
+        ).
+%  IV)
+listaHazaniasPorComoLaConocio(Pueblo, Lista, ComoLaConocio ,Anio):-
+    findall(
+        Hazania,
+        conocioHazania(_, Anio, ComoLaConocio,hazania(Hazania, Pueblo, _)),
+        Lista
+    ).
+
+hayMasHazaniasEscuchadas(ListaEscuchadas,ListaPresenciadas,ListaLeidas):-
+    length(ListaEscuchadas, CantEscuchadas),
+    length(ListaPresenciadas, CantPresenciadas),
+    length(ListaLeidas, CantLeidas),
+    CantEscuchadas > CantLeidas,
+    CantEscuchadas > CantPresenciadas.
+
+esPuebloMusicalEnAnio(Pueblo,Anio):-
+    esPueblo(Pueblo),
+    listaHazaniasPorComoLaConocio(Pueblo, ListaEscuchadas, escuchoCancion, Anio),
+    listaHazaniasPorComoLaConocio(Pueblo, ListaPresenciadas, presencio, Anio),
+    listaHazaniasPorComoLaConocio(Pueblo, ListaLeidas, leyo(_), Anio),
+    hayMasHazaniasEscuchadas(ListaEscuchadas,ListaPresenciadas,ListaLeidas).
+%   V)
+esPuebloChismosoEnAnio(Pueblo,Anio):-
+    esPueblo(Pueblo),
+    forall(
+        conocioHazania(_, Anio, _,hazania(Hazania, Pueblo, _)),
+        not(estaCorroborada(Hazania))
+        ).    
+%   VI)
+hazaniaEsImportanteEnPueblo(Pueblo,NombreHazania,Anio):-
+    esPueblo(Pueblo),
+    forall(
+        (persona(Persona, Pueblo, _, _), estaVivoEnAnio(Persona, Anio)),
+        recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio)
+    ).
+%   VII
+puebloViveTiempoSinPresedente(Pueblo, Anio):-
+    esPueblo(Pueblo),
+    forall(
+        hazaniaEsImportanteEnPueblo(Pueblo, Hazania, Anio),
+        conocioHazania(_, Anio, presencio,hazania(Hazania,_,_) )
+        ).
+
 :- begin_tests(tpIntegrador, []).
 
     test("Una persona esta viva si ya nacio y no supero su esperanza de vida", nondet):-
