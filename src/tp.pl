@@ -83,6 +83,61 @@ conocioHazania(
     hazania(recuperarGatoPerdido, weise, [himmel, frieren])
 ).
 
+% CASO DIA FESTIVO
+
+conocioHazania(Persona, AnioDesde, porDiaFestivo, hazania(NombreHazania, _, _)):-
+    
+    %Garantizo inversibilidad respecto de Persona (y unifico el pueblo en que nacio)
+    persona(Persona, Pueblo, AnioNacimiento, _),
+
+    %Verifico si existe una festividad en dicho pueblo que conmemore la Hazania
+    esConmemorada(hazania(NombreHazania, _, _), Pueblo, AnioDesde, diaFestivo),
+
+    %Verifico si la festividad se empezo a celebrar luego de su nacimiento (La conoce desde que se empezo a celebrar)
+    AnioDesde > AnioNacimiento,
+
+    %Verifico que siga vivo en dicho Anio
+    estaVivoEnAnio(Persona,AnioDesde).
+
+conocioHazania(Persona, AnioNacimiento, porDiaFestivo, hazania(NombreHazania, _, _)):-
+    
+    %Garantizo inversibilidad respecto de Persona (y unifico el pueblo en que nacio)
+    persona(Persona, Pueblo, AnioNacimiento, _),
+
+    %Verifico si existe una festividad en dicho pueblo que conmemore la Hazania
+    esConmemorada(hazania(NombreHazania, _, _), Pueblo, AnioDesde, diaFestivo),
+
+    %Verifico si la festividad se empezo antes/el mismo anio de su nacimiento (La conoce desde que nacio)
+    AnioDesde =< AnioNacimiento.
+
+
+% CASO ESTATUA
+
+conocioHazania(Persona, AnioDesde, porEstatua(NombreEstatua),hazania(NombreHazania, _, _)):-
+
+    %Garantizo inversibilidad respecto de Persona (y unifico el pueblo en que nacio)
+    persona(Persona, Pueblo, AnioNacimiento, _),
+
+    %Verifico si existe una estatua en dicho pueblo que conmemore la Hazania
+    esConmemorada(hazania(NombreHazania, _, _), Pueblo, AnioDesde, estatua(NombreEstatua, _, _)),
+
+    %Verifico si la estatua se construyo luego de su nacimiento (La cnoce desde que se construyo)
+    AnioDesde > AnioNacimiento,
+
+    %Verifico que este vivo cuando se construyo la estatua
+    estaVivoEnAnio(Persona,AnioDesde). 
+
+conocioHazania(Persona, AnioNacimiento, porEstatua(NombreEstatua),hazania(NombreHazania, _, _)):-
+    
+    %Garantizo inversibilidad respecto de Persona (y unifico el pueblo en que nacio)
+    persona(Persona, Pueblo, AnioNacimiento, _),
+
+    %Verifico si existe una estatua en dicho pueblo que conmemore la Hazania
+    esConmemorada(hazania(NombreHazania, _, _), Pueblo, AnioDesde, estatua(NombreEstatua, _, _)),
+
+    %Verifico si la estatua se construyo antes/el mismo anio de su nacimiento (La conoce desde que nacio)
+    AnioDesde =< AnioNacimiento.
+
 
 % todaviaLoRecuerda(Como, AnioConocio, Anio)    %Evitamos poner el CuantosAniosLaRecuerda, porque para las estatuas es una condicion
 
@@ -94,7 +149,7 @@ recuerdaHazania(NombreDePersona, NombreHazania, Anio):-
 
     conocioHazania(NombreDePersona, AnioConocio, Como,hazania(NombreHazania, _, _)),
 
-%El Anio debe ser mayor al anio en que la conocio (Usando between garantizo que sea inversible respecto de Anio)
+    %El Anio debe ser mayor al anio en que la conocio (Usando between garantizo que sea inversible respecto de Anio)
 
     between(AnioConocio, inf, Anio),
 
@@ -124,11 +179,96 @@ todaviaLoRecuerda(leyo(paginas(CuantasPaginas)), AnioConocio, Anio):-
 
     between(AnioConocio, AnioDeOlvido, Anio).
 
+%CASO DIA FESTIVO
+
+todaviaLoRecuerda(porDiaFestivo, _, _). %Si hay un dia festivo la recuerda para siempre (La verificacion de seguir vivo esta en recuerdaHazania)
+
+%CASO ESATUA
+
+todaviaLoRecuerda(porEstatua(NombreEstatua), _, Anio):-
+    
+    %Garantizo inversibilidad respecto de NombreEstatua
+    esConmemorada(_,_,_,estatua(NombreEstatua, _, _)),
+
+    %Estas hazañas son recordadas si la estatua sigue en buen estado.
+    estaEnBuenEstado(NombreEstatua, Anio).
+
 /*
-Una hazaña está corroborada si solo hay una versión de la misma, y no lo está si hubo diferentes personas 
-que la conocieron con distintos detalles (ya sea diferentes personas que la llevaron a cabo o diferente 
-lugar en el que ocurrió la hazaña)
+    Una estatua está en buen estado…:
+
+    sí es de mármol, si tuvo un mantenimiento o fue construida hace no más de 30 años.
+    sí es de bronce, si tuvo un mantenimiento o fue construida hace no más de 15 años.
 */
+estaEnBuenEstado(NombreEstatua, AnioActual):-
+    
+    %Obtengo datos de la estatua
+    esConmemorada(_,_,AnioConstruccion,estatua(NombreEstatua, Material, _)),
+
+    %Obtengo la Duracion del material
+    duracionMaterial(Material, Duracion),
+
+    construidaRecientemente(AnioConstruccion, Duracion, AnioActual).    %Es inversible respecto de AnioActual
+
+estaEnBuenEstado(NombreEstatua, AnioActual):-
+    
+    %Obtengo datos de la estatua
+    esConmemorada(_,_,_,estatua(NombreEstatua, Material, AniosMantenimiento)),
+
+    %Obtengo la Duracion del material
+    duracionMaterial(Material, Duracion),
+    
+    mantenidaRecientemente(AniosMantenimiento, Duracion, AnioActual). %Es inversible respecto de AnioActual
+
+
+%Asocio c/material con su duracion
+duracionMaterial(marmol, 30).
+duracionMaterial(bronce, 15).
+
+construidaRecientemente(AnioConstruccion, Duracion, AnioActual):-
+
+    %Dependiende de la duracion del material
+    AnioFinal is AnioConstruccion + Duracion,
+
+    between(AnioConstruccion, AnioFinal, AnioActual).
+
+
+%No considero el caso de AniosMantenimiento=[] por principio de universo cerrado
+%No considero el caso de AniosMantenimiento=[Anio], esta contenido en el siguiente
+
+%Caso 1 o mas anios de mantenimiento
+mantenidaRecientemente([Anio1|AniosSiguientes], Duracion, AnioActual):-
+
+    %Si no existe ningun otro anio en el q se le realizo mantenimiento posterior a Anio1, pero menor/igual a AnioActual
+
+    not(
+            (
+                member(UnAnio, AniosSiguientes),    
+                %Si AniosSiguientes es [], esto da false, por ende el not() es true, esto funciona 
+                %porque Anio1 es el ultimo anio en que se le realizo mantenimiento
+
+                between(Anio1, AnioActual, UnAnio)
+                
+            )
+        ),
+
+    %Entonces Anio1 es el ultimo anio en que se le realizo mantenimiento
+    %Verifico que el AnioActual sea posterior a este, pero no exceda el AnioFinal
+
+    AnioFinal is Anio1 + Duracion,
+
+    between(Anio1, AnioFinal, AnioActual).
+    
+mantenidaRecientemente([Anio1|AniosSiguientes], Duracion, AnioActual):-
+    
+    %Si existe algun anio en el que se le realizo mantenimiento posterior a Anio1, pero menor/igual a AnioActual
+
+    member(UnAnio, AniosSiguientes),
+
+    between(Anio1, AnioActual, UnAnio),
+
+    %Entonces el ultimo Anio en que se le realizo mantenimiento esta en la lista AniosSiguientes, lo busco de forma recursiva
+
+    mantenidaRecientemente(AniosSiguientes, Duracion, AnioActual).
 
 
 estaCorroborada(NombreHazania):-
@@ -184,14 +324,6 @@ pasoAlOlvido(NombreHazania, Anio):-
 
 % 3 - a
 
-
-/*
-
-el año de comienzo no es una propiedad de la estatua ni de la festividad, sino que de la propia conmemoración, por lo que sería correcto que vaya como argumento del predicado y no dentro del functor.
-El otro tema es que estaría bueno que incluyan los nombres de las estatuas.
-*/
-
-
 % esConmemorada(Hazania, Donde, AnioDesde, Como)
 
 % Como -> diaFestivo / estatua(Nombre, Material, [AniosMantenimiento])
@@ -206,216 +338,19 @@ esConmemorada(
 esConmemorada(
                 hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
                 auberst,
-                1340,
-                estatua(destruirReyDemonio, bronce, [1400, 1450])
+                1370,
+                estatua(elEquipoDeHeroes, bronce, [1400, 1450])
             ).
 
 esConmemorada(
                 hazania(destruirSchlatElOmniscente, ende, [heroeDelSur]),
                 auberst,
                 1340,
-                estatua(destruirSchlatElOmniscente, marmol, [1410])
+                estatua(elHeroeDelSur, marmol, [1410])
             ).
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-% 3-b
-
-
-% CASO DIA FESTIVO
-
-conocioHazania(Persona, AnioDesde, porDiaFestivo, hazania(NombreHazania, _, _)):-
-    persona(Persona, Pueblo, AnioNacimiento, _),
-    conmemoraConFestividad(NombreHazania, Pueblo, AnioDesde),
-    AnioDesde >= AnioNacimiento,
-    estaVivoEnAnio(Persona,AnioDesde). %Verifico que este vivo cuando se empezo a celebrar la hazania
-
-conocioHazania(Persona, AnioNacimiento, porDiaFestivo, hazania(NombreHazania, _, _)):-
-    persona(Persona, Pueblo, AnioNacimiento, _),
-    conmemoraConFestividad(NombreHazania, Pueblo, AnioDesde),
-    AnioDesde =< AnioNacimiento. %Si se celebrara desde antes, conoce la hazania desde q nacio
-
-
-%   CASO ESTATUA
-
-conocioHazania(Persona, AnioDesde, porEstatua,hazania(NombreHazania, _, _)):-
-    persona(Persona, Pueblo, AnioNacimiento, _),
-    conmemoraConEstatua(NombreHazania, Pueblo, AnioDesde),
-    AnioDesde >= AnioNacimiento,
-    estaVivoEnAnio(Persona,AnioDesde). %Verifico que este vivo cuando se construyo la estatua.
-
-conocioHazania(Persona, AnioNacimiento, porEstatua,hazania(NombreHazania, _, _)):-
-    persona(Persona, Pueblo, AnioNacimiento, _),
-    conmemoraConEstatua(NombreHazania, Pueblo, AnioDesde),
-    AnioDesde =< AnioNacimiento. %Si se existia desde antes, conoce la hazania desde q nacio
-
-
-
-% Predicados aux para mas expresividad
-conmemoraConFestividad(NombreHazania, Pueblo, AnioDesde):-
-    esConmemorada(hazania(NombreHazania, _, _), Pueblo, diaFestivo(AnioDesde)).
-
-conmemoraConEstatua(NombreHazania, Pueblo, AnioDesde):-
-    esConmemorada(hazania(NombreHazania, _, _), Pueblo, estatua(AnioDesde, _, _)).
-
-
-
-% cuantoAniosRecuerdaHazania(modoEnQueLaConocio, tiempoQueLaRecuerda)
-cuantoAniosRecuerdaHazania(presencio, siempre).
-cuantoAniosRecuerdaHazania(escuchoCancion, 15).
-cuantoAniosRecuerdaHazania(leyo(paginas(CantPaginas)), CantPaginas).
-
-
-% 3-b
-cuantoAniosRecuerdaHazania(porDiaFestivo, siempre).
-
-
-
-
-
-% 2-a
-% todaviaLoRecuerda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio)
-todaviaLoRecueda(CuandoLaConocio, siempre, Anio):-
-    between(CuandoLaConocio, inf, Anio).
-
-todaviaLoRecueda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio):-
-    CuantosAniosLaRecuerda \= siempre,
-    CuandoLoOlvida is CuandoLaConocio + CuantosAniosLaRecuerda,
-    between(CuandoLaConocio, CuandoLoOlvida, Anio).
-
-recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
-    conocioHazania(Persona, CuandoLaConocio, ComoLaConocio, hazania(NombreHazania,_,_)),
-    estaVivoEnAnio(Persona,Anio),
-    cuantoAniosRecuerdaHazania(ComoLaConocio, CuantosAniosLaRecuerda),
-    todaviaLoRecueda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio).
-
-% 3-b
-recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
-    conocioHazania(Persona, CuandoLaConocio, porEstatua, hazania(NombreHazania,_,_)),
-    Anio >= CuandoLaConocio,
-    estaVivoEnAnio(Persona,Anio),
-    persona(Persona, Pueblo, _, _),
-    conmemoraConEstatuaEnBuenEstado(NombreHazania, Pueblo, Anio).
-
-% Predicado aux para mas expresividad
-conmemoraConEstatuaEnBuenEstado(NombreHazania, Pueblo, AnioActual):-
-    esConmemorada(hazania(NombreHazania, _, _), Pueblo, estatua(AnioDesde, Material, AniosMantenimiento)),
-    estaEnBuenEstado(estatua(AnioDesde, Material, AniosMantenimiento), AnioActual).
-
-% Predicado aux mantenimientoReciente
-%% Revisa si alguno de los anios de mantenimiento está dentro de la distancia dada. Asume que la lista de anios de mantenimiento está ordenada de menor a mayor.
-
-% TUVO MANTINIMIENTO UN SOLO AÑO
-
-mantenimientoReciente(AnioActual,[AnioMantenimiento],Distancia):-
-    AnioActual>=AnioMantenimiento, 
-    AnioActual-AnioMantenimiento =< Distancia.
-
-% TUVO MANTINIMIENTO VARIOS AÑOS
-
-mantenimientoReciente(AnioActual,[X|Xs],Distancia):-
-    AnioActual>=X,
-    AnioActual-X =< Distancia;
-    mantenimientoReciente(AnioActual,Xs,Distancia).
-
-% ESTATUAS DE MARMOL
-
-estaEnBuenEstado(estatua(AnioDesde, marmol, []), AnioActual):- 
-    AnioActual >= AnioDesde,
-    AnioActual - AnioDesde =< 30.
-
-estaEnBuenEstado(estatua(_, marmol, AniosMantenimiento), AnioActual):-
-    mantenimientoReciente(AnioActual,AniosMantenimiento,30).
-
-% ESTATUAS DE BRONCE
-
-estaEnBuenEstado(estatua(AnioDesde, bronce, []), AnioActual):-
-    AnioActual >= AnioDesde,
-    AnioActual - AnioDesde =< 15.
-
-estaEnBuenEstado(estatua(_, bronce, AniosMantenimiento), AnioActual):-
-    mantenimientoReciente(AnioActual,AniosMantenimiento,15).
-
-
-
-% 2-b
-
-% Predicado auxiliar
-
-% compara con el resto de personas que que conocen hazanias con el mismo nombre y se evalua si ocurren en el mismo lugar y tienen los mismos participantes.
-estaCorroborada(NombreHazania) :-
-    conocioHazania(_, _, _, hazania(NombreHazania, Donde1, Quienes1)),
-    forall(                                                                  
-        conocioHazania(_, _, _, hazania(NombreHazania, Donde2, Quienes2)),   
-        (
-            Donde1 == Donde2,
-            Quienes1 == Quienes2
-        )
-    ).
-
-% 2 - c
-pasoAlOlvido(NombreHazania, Anio):-
-    conocioHazania(_,_,_,hazania(NombreHazania, _, _)),
-    not(recuerdaHazaniaEnAnio(_, NombreHazania, Anio)).
-
-
-% 3 - a
-
-% esConmemorada(hazania(NombreHazania, Donde, [Quienes]), Donde, diaFestivo(AnioDesde)/ estatua(AnioDesde, Material, [AniosMantenimiento]))
-
-    esConmemorada(hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
-                    weise, diaFestivo(1340)).
-
-    esConmemorada(hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
-                    auberst, estatua(1370, bronce, [1400, 1450])).
-            
-    esConmemorada(hazania(destruirSchlatElOmniscente, ende, [heroeDelSur]),
-                    auberst, estatua(1340, marmol, [1410])).
-*/
 
 
 :- begin_tests(tpIntegrador, []).
@@ -447,11 +382,34 @@ pasoAlOlvido(NombreHazania, Anio):-
         pasoAlOlvido(destruirDemonioAura, 1460),
         not(pasoAlOlvido(destruirDemonioAura, 1440)).
 
-    /*
+    test("Una estatua esta en buen estado, segun su material, si fue construida/tuvo mantenimiento reciente dentro del rango de duracion del material"):-
+        
+        %Lawine recuerda destruir al rey demonio en 1400 ya que vive en Auberst y allí hay una estatua en buen estado conmemorando la hazaña
+        estaEnBuenEstado(elEquipoDeHeroes, 1400),
+
+        %en 1390 Lawine no recuerda destruir al rey demonio porque la estatua no se encuentra en buen estado en ese momento
+        not(estaEnBuenEstado(elEquipoDeHeroes, 1390)),
+
+        %En 1000 la estatua elHeroeDelSur no habia sido construida, no puede estar en buen estado
+        not(estaEnBuenEstado(elHeroeDelSur, 1000)), 
+
+        %En 1360 la estatua de marmol elHeroeDelSur q se construyo en 1340 y no tuvo mantenimiento hasta 1410 sigue en buen estado, no pasaron 30 anios
+        estaEnBuenEstado(elHeroeDelSur, 1360),
+
+        %En 1371 la estatua de marmol elHeroeDelSur q se construyo en 1340 y no tuvo mantenimiento hasta 1410 ya esta en mal estado
+        not(estaEnBuenEstado(elHeroeDelSur, 1371)), 
+
+        %En 1420 la estatua de marmol elHeroeDelSur tuvo mantenimiento en 1410 y sigue en buen estado, no pasaron 30 anios
+        estaEnBuenEstado(elHeroeDelSur, 1420),
+
+        %Pero en 1441 dejo de tener mantenimiento, esta en mal estado
+        not(estaEnBuenEstado(elHeroeDelSur, 1441)).
+
+
     test("Una persona conocio una hazania si donde vive hay alguna estatua que conmemore la hazania. Es recordada si la estatua sigue en buen estado.",nondet):-
-        recuerdaHazaniaEnAnio(lawine,destruirReyDemonio,1400),
-        not(recuerdaHazaniaEnAnio(lawine, destruirReyDemonio,1390)),
-        recuerdaHazaniaEnAnio(fern,destruirReyDemonio,1400).
-        */
+        recuerdaHazania(lawine,destruirReyDemonio,1400),
+        not(recuerdaHazania(lawine, destruirReyDemonio,1390)),
+        recuerdaHazania(fern,destruirReyDemonio,1400).
+    
         
 :- end_tests(tpIntegrador).
