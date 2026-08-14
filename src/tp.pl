@@ -124,8 +124,49 @@ todaviaLoRecuerda(leyo(paginas(CuantasPaginas)), AnioConocio, Anio):-
 
     between(AnioConocio, AnioDeOlvido, Anio).
 
-    
+/*
+Una hazaña está corroborada si solo hay una versión de la misma, y no lo está si hubo diferentes personas 
+que la conocieron con distintos detalles (ya sea diferentes personas que la llevaron a cabo o diferente 
+lugar en el que ocurrió la hazaña)
+*/
 
+
+estaCorroborada(NombreHazania):-
+    
+    %Garantizo inversibilidad
+
+    conocioHazania(_,_,_,hazania(NombreHazania, _, _)),
+
+    hayUnaUnicaVersion(NombreHazania).
+
+
+hayUnaUnicaVersion(NombreHazania):-
+
+    conocioHazania(_,_,_,hazania(NombreHazania, Lugar, Heroes)),
+    
+    not(    %Niego la existencia de versiones distintas
+
+            (
+            conocioHazania(_,_,_,hazania(NombreHazania, OtroLugar, OtrosHeroes)),
+
+            OtroLugar \= Lugar,
+
+            OtrosHeroes \= Heroes
+            )
+    )
+    
+    /*
+        %Version con forall
+
+        forall(
+            conocioHazania(_,_,_,hazania(NombreHazania, OtroLugar, OtrosHeroes)), %Genero todas las Hazanias con el mismo nombre, dejo el lugar y heroes de incognita
+            (%Deben coincidir los detalles, si es la unica version que existe tambien es true
+                OtroLugar == Lugar,
+                OtrosHeroes == Heroes
+            )
+        )
+    */
+    .
 
 
 
@@ -351,13 +392,15 @@ pasoAlOlvido(NombreHazania, Anio):-
         recuerdaHazania(wirbel, rescatarHermanaDeWirbel, 1430),
         not(recuerdaHazania(wirbel, rescatarHermanaDeWirbel, 1440)). %porque murio
 
-    /*
+    
     test("Una hazania esta corroborada si hay unica version de la misma", nondet):-
         estaCorroborada(rescatarHermanaDeWirbel),   %Las versiones de frieren y wirbel coinciden
         not(estaCorroborada(destruirDemonioAura)),  %Las versiones de lawine y voll difieren
-        estaCorroborada(recuperarGatoPerdido),      %Hay una sola version
-        not(estaCorroborada(destruirReyDemonio)).        %La version  de Serie y del pueblo de weise son distintas
+        estaCorroborada(recuperarGatoPerdido).      %Hay una sola version
+        %not(estaCorroborada(destruirReyDemonio)).        %La version  de Serie y del pueblo de weise son distintas
 
+
+    /*
     test("Una hazania pasa al olvido en un determinado anio si ya nadie la recuerda en dicho anio", nondet):-
         pasoAlOlvido(destruirDemonioAura, 1460),
         not(pasoAlOlvido(destruirDemonioAura, 1440)).
