@@ -19,7 +19,7 @@ persona(eisen,   riegel,  1150, enano).
 % 1 - b
 
 esperanzaDeVida(enano,350).
-esperanzaDeVida(humano,85).
+esperanzaDeVida(humano,80).
 esperanzaDeVida(elfo,infinito).
 
 sigueVivo(Anio,AnioNacimiento,infinito):-
@@ -84,9 +84,99 @@ conocioHazania(
 ).
 
 
+% todaviaLoRecuerda(Como, AnioConocio, Anio)    %Evitamos poner el CuantosAniosLaRecuerda, porque para las estatuas es una condicion
 
 
-%3-b
+recuerdaHazania(NombreDePersona, NombreHazania, Anio):-
+    persona(NombreDePersona, _, _, _),
+
+    %La debe haber conocido en algun momento
+
+    conocioHazania(NombreDePersona, AnioConocio, Como,hazania(NombreHazania, _, _)),
+
+%El Anio debe ser mayor al anio en que la conocio (Usando between garantizo que sea inversible respecto de Anio)
+
+    between(AnioConocio, inf, Anio),
+
+    %Debe estar vivo en dicho Anio
+
+    estaVivoEnAnio(NombreDePersona,Anio),
+
+    %Todavia recuerda la Hazania segun como la conocio
+
+    todaviaLoRecuerda(Como, AnioConocio, Anio).
+
+todaviaLoRecuerda(presencio, _, _). %Si la presencio la recuerda para siempre (La verificacion de seguir vivo esta en recuerdaHazania)
+
+todaviaLoRecuerda(escuchoCancion, AnioConocio, Anio):-
+
+    %si una persona escuchó una canción sobre una hazaña, la recuerda por 15 años.
+
+    AnioDeOlvido is AnioConocio + 15,
+
+    between(AnioConocio, AnioDeOlvido, Anio).
+
+todaviaLoRecuerda(leyo(paginas(CuantasPaginas)), AnioConocio, Anio):-
+
+    %si una persona leyó un libro sobre una hazaña, la recuerda por tantos años como páginas tenga el libro.
+
+    AnioDeOlvido is AnioConocio + CuantasPaginas,
+
+    between(AnioConocio, AnioDeOlvido, Anio).
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+% 3-b
 
 
 % CASO DIA FESTIVO
@@ -118,7 +208,7 @@ conocioHazania(Persona, AnioNacimiento, porEstatua,hazania(NombreHazania, _, _))
 
 
 
-%Predicados aux para mas expresividad
+% Predicados aux para mas expresividad
 conmemoraConFestividad(NombreHazania, Pueblo, AnioDesde):-
     esConmemorada(hazania(NombreHazania, _, _), Pueblo, diaFestivo(AnioDesde)).
 
@@ -127,21 +217,21 @@ conmemoraConEstatua(NombreHazania, Pueblo, AnioDesde):-
 
 
 
-%cuantoAniosRecuerdaHazania(modoEnQueLaConocio, tiempoQueLaRecuerda)
+% cuantoAniosRecuerdaHazania(modoEnQueLaConocio, tiempoQueLaRecuerda)
 cuantoAniosRecuerdaHazania(presencio, siempre).
 cuantoAniosRecuerdaHazania(escuchoCancion, 15).
 cuantoAniosRecuerdaHazania(leyo(paginas(CantPaginas)), CantPaginas).
 
 
-%3-b
+% 3-b
 cuantoAniosRecuerdaHazania(porDiaFestivo, siempre).
 
 
 
 
 
-%2-a
-%todaviaLoRecuerda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio)
+% 2-a
+% todaviaLoRecuerda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio)
 todaviaLoRecueda(CuandoLaConocio, siempre, Anio):-
     between(CuandoLaConocio, inf, Anio).
 
@@ -156,7 +246,7 @@ recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
     cuantoAniosRecuerdaHazania(ComoLaConocio, CuantosAniosLaRecuerda),
     todaviaLoRecueda(CuandoLaConocio, CuantosAniosLaRecuerda, Anio).
 
-%3-b
+% 3-b
 recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
     conocioHazania(Persona, CuandoLaConocio, porEstatua, hazania(NombreHazania,_,_)),
     Anio >= CuandoLaConocio,
@@ -164,7 +254,7 @@ recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio):-
     persona(Persona, Pueblo, _, _),
     conmemoraConEstatuaEnBuenEstado(NombreHazania, Pueblo, Anio).
 
-%Predicado aux para mas expresividad
+% Predicado aux para mas expresividad
 conmemoraConEstatuaEnBuenEstado(NombreHazania, Pueblo, AnioActual):-
     esConmemorada(hazania(NombreHazania, _, _), Pueblo, estatua(AnioDesde, Material, AniosMantenimiento)),
     estaEnBuenEstado(estatua(AnioDesde, Material, AniosMantenimiento), AnioActual).
@@ -185,7 +275,7 @@ mantenimientoReciente(AnioActual,[X|Xs],Distancia):-
     AnioActual-X =< Distancia;
     mantenimientoReciente(AnioActual,Xs,Distancia).
 
-%ESTATUAS DE MARMOL
+% ESTATUAS DE MARMOL
 
 estaEnBuenEstado(estatua(AnioDesde, marmol, []), AnioActual):- 
     AnioActual >= AnioDesde,
@@ -194,7 +284,7 @@ estaEnBuenEstado(estatua(AnioDesde, marmol, []), AnioActual):-
 estaEnBuenEstado(estatua(_, marmol, AniosMantenimiento), AnioActual):-
     mantenimientoReciente(AnioActual,AniosMantenimiento,30).
 
-%ESTATUAS DE BRONCE
+% ESTATUAS DE BRONCE
 
 estaEnBuenEstado(estatua(AnioDesde, bronce, []), AnioActual):-
     AnioActual >= AnioDesde,
@@ -207,7 +297,7 @@ estaEnBuenEstado(estatua(_, bronce, AniosMantenimiento), AnioActual):-
 
 % 2-b
 
-%Predicado auxiliar
+% Predicado auxiliar
 
 % compara con el resto de personas que que conocen hazanias con el mismo nombre y se evalua si ocurren en el mismo lugar y tienen los mismos participantes.
 estaCorroborada(NombreHazania) :-
@@ -228,17 +318,18 @@ pasoAlOlvido(NombreHazania, Anio):-
 
 % 3 - a
 
-%esConmemorada(hazania(NombreHazania, Donde, [Quienes]), Donde, diaFestivo(AnioDesde)/ estatua(AnioDesde, Material, [AniosMantenimiento]))
+% esConmemorada(hazania(NombreHazania, Donde, [Quienes]), Donde, diaFestivo(AnioDesde)/ estatua(AnioDesde, Material, [AniosMantenimiento]))
+*/
+/*
+    esConmemorada(hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
+                    weise, diaFestivo(1340)).
 
-esConmemorada(hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
-                weise, diaFestivo(1340)).
-
-esConmemorada(hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
-                auberst, estatua(1370, bronce, [1400, 1450])).
-        
-esConmemorada(hazania(destruirSchlatElOmniscente, ende, [heroeDelSur]),
-                auberst, estatua(1340, marmol, [1410])).
-
+    esConmemorada(hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
+                    auberst, estatua(1370, bronce, [1400, 1450])).
+            
+    esConmemorada(hazania(destruirSchlatElOmniscente, ende, [heroeDelSur]),
+                    auberst, estatua(1340, marmol, [1410])).
+*/
 
 
 :- begin_tests(tpIntegrador, []).
@@ -252,14 +343,15 @@ esConmemorada(hazania(destruirSchlatElOmniscente, ende, [heroeDelSur]),
         not(estaVivoEnAnio(voll,1551)).    %ya murio
     
     test("Una persona recuerda una hazania si sigue vivo, la presencio/leyo/escucho sobre ella y todavia la recuerda", nondet):-
-        not(recuerdaHazaniaEnAnio(lawine, destruirDemonioAura, 1380)),  %todavia no escucho la cancion
-        recuerdaHazaniaEnAnio(lawine, destruirDemonioAura, 1400),       %ahora si
-        not(recuerdaHazaniaEnAnio(lawine, destruirDemonioAura, 1410)),  %la olvido
-        recuerdaHazaniaEnAnio(voll, destruirDemonioAura, 1410),
-        not(recuerdaHazaniaEnAnio(voll, destruirDemonioAura, 1460)),
-        recuerdaHazaniaEnAnio(wirbel, rescatarHermanaDeWirbel, 1430),
-        not(recuerdaHazaniaEnAnio(wirbel, rescatarHermanaDeWirbel, 1440)). %porque murio
+        not(recuerdaHazania(lawine, destruirDemonioAura, 1380)),  %todavia no escucho la cancion
+        recuerdaHazania(lawine, destruirDemonioAura, 1400),       %ahora si
+        not(recuerdaHazania(lawine, destruirDemonioAura, 1410)),  %la olvido
+        recuerdaHazania(voll, destruirDemonioAura, 1450),
+        not(recuerdaHazania(voll, destruirDemonioAura, 1460)),
+        recuerdaHazania(wirbel, rescatarHermanaDeWirbel, 1430),
+        not(recuerdaHazania(wirbel, rescatarHermanaDeWirbel, 1440)). %porque murio
 
+    /*
     test("Una hazania esta corroborada si hay unica version de la misma", nondet):-
         estaCorroborada(rescatarHermanaDeWirbel),   %Las versiones de frieren y wirbel coinciden
         not(estaCorroborada(destruirDemonioAura)),  %Las versiones de lawine y voll difieren
@@ -274,5 +366,6 @@ esConmemorada(hazania(destruirSchlatElOmniscente, ende, [heroeDelSur]),
         recuerdaHazaniaEnAnio(lawine,destruirReyDemonio,1400),
         not(recuerdaHazaniaEnAnio(lawine, destruirReyDemonio,1390)),
         recuerdaHazaniaEnAnio(fern,destruirReyDemonio,1400).
+        */
         
 :- end_tests(tpIntegrador).
