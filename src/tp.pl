@@ -169,7 +169,53 @@ hayUnaUnicaVersion(NombreHazania):-
     .
 
 
+pasoAlOlvido(NombreHazania, Anio):-
 
+    %Garantizo inversibilidad respecto de NombreHazania
+    conocioHazania(_,_,_,hazania(NombreHazania, _, _)),
+
+    %Garantizo inversibilidad respecto de Anio 
+    between(0, inf, Anio),
+    
+    %Niego la existencia de personas que recuerden la hazania indicada en dicho Anio
+    not(recuerdaHazania(_, NombreHazania, Anio)).
+
+
+
+% 3 - a
+
+
+/*
+
+el año de comienzo no es una propiedad de la estatua ni de la festividad, sino que de la propia conmemoración, por lo que sería correcto que vaya como argumento del predicado y no dentro del functor.
+El otro tema es que estaría bueno que incluyan los nombres de las estatuas.
+*/
+
+
+% esConmemorada(Hazania, Donde, AnioDesde, Como)
+
+% Como -> diaFestivo / estatua(Nombre, Material, [AniosMantenimiento])
+
+esConmemorada(
+                hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
+                weise,
+                1340,
+                diaFestivo
+            ).
+
+esConmemorada(
+                hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
+                auberst,
+                1340,
+                estatua(destruirReyDemonio, bronce, [1400, 1450])
+            ).
+
+esConmemorada(
+                hazania(destruirSchlatElOmniscente, ende, [heroeDelSur]),
+                auberst,
+                1340,
+                estatua(destruirSchlatElOmniscente, marmol, [1410])
+            ).
 
 
 
@@ -360,8 +406,7 @@ pasoAlOlvido(NombreHazania, Anio):-
 % 3 - a
 
 % esConmemorada(hazania(NombreHazania, Donde, [Quienes]), Donde, diaFestivo(AnioDesde)/ estatua(AnioDesde, Material, [AniosMantenimiento]))
-*/
-/*
+
     esConmemorada(hazania(destruirReyDemonio, ende, [frieren, himmel, heiter, eisen]),
                     weise, diaFestivo(1340)).
 
@@ -392,19 +437,17 @@ pasoAlOlvido(NombreHazania, Anio):-
         recuerdaHazania(wirbel, rescatarHermanaDeWirbel, 1430),
         not(recuerdaHazania(wirbel, rescatarHermanaDeWirbel, 1440)). %porque murio
 
-    
     test("Una hazania esta corroborada si hay unica version de la misma", nondet):-
         estaCorroborada(rescatarHermanaDeWirbel),   %Las versiones de frieren y wirbel coinciden
         not(estaCorroborada(destruirDemonioAura)),  %Las versiones de lawine y voll difieren
         estaCorroborada(recuperarGatoPerdido).      %Hay una sola version
         %not(estaCorroborada(destruirReyDemonio)).        %La version  de Serie y del pueblo de weise son distintas
 
-
-    /*
     test("Una hazania pasa al olvido en un determinado anio si ya nadie la recuerda en dicho anio", nondet):-
         pasoAlOlvido(destruirDemonioAura, 1460),
         not(pasoAlOlvido(destruirDemonioAura, 1440)).
 
+    /*
     test("Una persona conocio una hazania si donde vive hay alguna estatua que conmemore la hazania. Es recordada si la estatua sigue en buen estado.",nondet):-
         recuerdaHazaniaEnAnio(lawine,destruirReyDemonio,1400),
         not(recuerdaHazaniaEnAnio(lawine, destruirReyDemonio,1390)),
