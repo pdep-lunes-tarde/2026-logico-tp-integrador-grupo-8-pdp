@@ -402,7 +402,7 @@ puebloQueMasLeeEnAnio(Pueblo, Anio):-
 %  IV)
 listaHazaniasPorComoLaConocio(Pueblo, Lista, ComoLaConocio ,Anio):-
     findall(
-        Hazania,
+    Hazania,                    % Lista de todas las hazania que una persona conocio durante cierto anio de una manera particular(ComoLaConocio)
         (persona(Persona,Pueblo,_,_),  conocioHazania(Persona, Anio, ComoLaConocio,hazania(Hazania, _, _))),
         Lista
     ).
@@ -424,24 +424,24 @@ esPuebloMusicalEnAnio(Pueblo,Anio):-
 esPuebloChismosoEnAnio(Pueblo,Anio):-
     esPueblo(Pueblo),
     forall(
-        (persona(Persona, Pueblo, _, _), conocioHazania(Persona, Anio, _,hazania(Hazania, _, _)) ),
-        not(estaCorroborada(Hazania))
+        (persona(Persona, Pueblo, _, _), conocioHazania(Persona, Anio, _,hazania(Hazania, _, _)) ),  % Para toda hazania conocida por alguien del pueblo
+        not(estaCorroborada(Hazania))                                                                % esa hazania no esta corroborrada
         ).    
 %   VI)
 hazaniaEsImportanteEnPueblo(Pueblo,NombreHazania,Anio):-
     esPueblo(Pueblo),
     esHazania(NombreHazania),
     forall(
-        (persona(Persona, Pueblo, _, _), estaVivoEnAnio(Persona, Anio)),
-        recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio)
+        (persona(Persona, Pueblo, _, _), estaVivoEnAnio(Persona, Anio)),    % Para toda persona de un pueblo y que siga viva durante cierto anio
+        recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio)                 % recuerda la hazania
     ).
 %   VII
 nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio):-
     esPueblo(Pueblo),
     esHazania(Hazania),
     forall(
-        persona(Persona,Pueblo,_,_),
-        not(conocioHazania(Persona, Anio, presencio,hazania(Hazania,_,_)))
+        persona(Persona,Pueblo,_,_),                                          % Para toda persona del pueblo durante cierto anio
+        not(conocioHazania(Persona, Anio, presencio,hazania(Hazania,_,_)))    % ninguna de esas personas PRESENCIO la hazania
         ).
 
 puebloViveTiempoSinPresedente(Pueblo, Anio):-
