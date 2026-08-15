@@ -503,4 +503,33 @@ puebloViveTiempoSinPresedente(Pueblo, Anio):-
         recuerdaHazania(fern,destruirReyDemonio,1400).
     
         
+
+        % Parte 2
+
+    
+    test("Un pueblo recuerda una hazania en un determinado anio si al menos una persona que vive en ese pueblo recuerda esa hazania", nondet):-
+        puebloRecuerdaHazaniaEnAnio(destruirReyDemonio, weise, 1400),
+        puebloRecuerdaHazaniaEnAnio(rescatarHermanaDeWirbel, klares, 1395),
+        not(puebloRecuerdaHazaniaEnAnio(destruirReyDemonio, klares, 1395)).
+
+    test("Las paginas leidas en un pueblo es la sumatoria de las paginas leidas de los habitantes de un pueblo", nondet):-
+        leyeronPaginasEnAnio(weise, 100, 1335),
+        leyeronPaginasEnAnio(weise, 0, 1336).
+
+    test("Un pueblo puede ser el que mas lee en un determinado anio", nondet):-
+        puebloQueMasLeeEnAnio(ende, 1400).
+
+
+    test("Un pueblo es musical si escucha mas hazanias cantadas que presenciadas o leidas", nondet):-
+        esPuebloMusicalEnAnio(auberst, 1393),
+        not(esPuebloMusicalEnAnio(weise, 1400)).
+
+    test("Una hazania es importante en un pueblo si todas las personas que viven alli la recuerdan", nondet):-
+        hazaniaEsImportanteEnPueblo(weise, destruirReyDemonio, 1400),
+        not(hazaniaEsImportanteEnPueblo(weise, recuperarGatoPerdido,1400)).
+
+    test("Un pueblo vive tiempos sin precedentes si todas las hazanias importantes fueron presenciadas", nondet):-
+        puebloViveTiempoSinPresedente(klares, 1390),
+        not(puebloViveTiempoSinPresedente(weise, 1400)).
+
 :- end_tests(tpIntegrador).
