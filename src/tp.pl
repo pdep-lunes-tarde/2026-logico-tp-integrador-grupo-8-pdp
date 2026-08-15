@@ -356,51 +356,6 @@ esConmemorada(
 
 %%%   ------------------    Parte 2       --------------------
 
-conocioHazania(
-    kanne,
-    1335,
-    leyo(paginas(350)),
-    hazania(hazania1, ende, [serie, denken])
-).
-
-conocioHazania(
-    kanne,
-    1335,
-    leyo(paginas(10)),
-    hazania(hazania3, auberst, [serie, denken])
-).
-
-conocioHazania(
-    fern,
-    1335,
-    leyo(paginas(50)),
-    hazania(hazania2, ende, [denken])
-).
-
-
-
-conocioHazania(
-    serie,
-    1335,
-    escuchoCancion,
-    hazania(hazania5, ende, [denken])
-).
-
-conocioHazania(
-    fern,
-    1335,
-    presencio,
-    hazania(destruirReyDemonio, ende, [denken])
-).
-
-conocioHazania(
-    fern,
-    1335,
-    escuchoCancion,
-    hazania(hazania6, ende, [denken])
-).
-
-
 
 
 esPueblo(auberst).
@@ -409,6 +364,13 @@ esPueblo(weise).
 esPueblo(riegel).
 esPueblo(klares).
 
+esHazania(rescatarHermanaDeWirbel).
+esHazania(destruirDemonioAura).
+esHazania(destruirReyDemonio).
+esHazania(recuperarGatoPerdido).
+
+
+
 % I )
 puebloRecuerdaHazaniaEnAnio(NombreHazania, Pueblo, Anio):-
     persona(Persona, Pueblo, AnioNacimiento, _),
@@ -416,9 +378,10 @@ puebloRecuerdaHazaniaEnAnio(NombreHazania, Pueblo, Anio):-
 % II ) 
 leyeronPaginasEnAnio(Pueblo, Total, Anio):-
     esPueblo(Pueblo),
+    persona(Persona, Pueblo, _, _ ),
     findall(
         CantPaginas ,
-        conocioHazania(_, Anio, leyo(paginas(CantPaginas)),hazania(_, Pueblo, _)),
+        conocioHazania(Persona, Anio, leyo(paginas(CantPaginas)),_),
         ListaCantPag
         ),
     sum_list(ListaCantPag, Total).
@@ -440,7 +403,7 @@ puebloQueMasLeeEnAnio(Pueblo, Anio):-
 listaHazaniasPorComoLaConocio(Pueblo, Lista, ComoLaConocio ,Anio):-
     findall(
         Hazania,
-        conocioHazania(_, Anio, ComoLaConocio,hazania(Hazania, Pueblo, _)),
+        (persona(Persona,Pueblo,_,_),  conocioHazania(Persona, Anio, ComoLaConocio,hazania(Hazania, _, _))),
         Lista
     ).
 
@@ -461,22 +424,31 @@ esPuebloMusicalEnAnio(Pueblo,Anio):-
 esPuebloChismosoEnAnio(Pueblo,Anio):-
     esPueblo(Pueblo),
     forall(
-        conocioHazania(_, Anio, _,hazania(Hazania, Pueblo, _)),
+        (persona(Persona, Pueblo, _, _), conocioHazania(Persona, Anio, _,hazania(Hazania, _, _)) ),
         not(estaCorroborada(Hazania))
         ).    
 %   VI)
 hazaniaEsImportanteEnPueblo(Pueblo,NombreHazania,Anio):-
     esPueblo(Pueblo),
+    esHazania(NombreHazania),
     forall(
         (persona(Persona, Pueblo, _, _), estaVivoEnAnio(Persona, Anio)),
         recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio)
     ).
 %   VII
+nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio):-
+    esPueblo(Pueblo),
+    esHazania(Hazania),
+    forall(
+        persona(Persona,Pueblo,_,_),
+        not(conocioHazania(Persona, Anio, presencio,hazania(Hazania,_,_)))
+        ).
+
 puebloViveTiempoSinPresedente(Pueblo, Anio):-
     esPueblo(Pueblo),
     forall(
-        hazaniaEsImportanteEnPueblo(Pueblo, Hazania, Anio),
-        conocioHazania(_, Anio, presencio,hazania(Hazania,_,_) )
+        hazaniaEsImportanteEnPueblo(Pueblo, Hazania, Anio),       % Para toda hazania importante de un pueblo durante un anio
+        not(nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio))  % Al menos uno la presencio
         ).
 
 :- begin_tests(tpIntegrador, []).
