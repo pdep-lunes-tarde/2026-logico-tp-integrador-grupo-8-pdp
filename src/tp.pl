@@ -453,10 +453,30 @@ puebloViveTiempoSinPresedente(Pueblo, Anio):-
 
 % punto 5
 % a)
-esHeroe(Persona):-  % devuelve muchos true
+
+persona(himmel,    ende,    1200, elfo).        % No estaban en el enunciado de la parte I pero hace falta agregarlos
+persona(heiter,    ende,    1200, enano).
+
+esHeroe(Persona):-
     persona(Persona, _, _ , _),
     conocioHazania(_,_,_, hazania(_, _, Participantes) ),
     member(Persona, Participantes).
+
+inspiroHeroe(Heroe, Persona):-
+    persona(Persona,_,_,_),
+    persona(Heroe,_,_,_),
+    esHeroe(Heroe),
+    conocioHazania(Heroe,_,_, hazania(_, _, Participantes) ),
+    member(Persona, Participantes),
+    Persona \= Heroe.
+
+% segun el enunciado Himmel → Frieren → Fern → Denken deberia ser valida pero denken
+% no es ni heroe ni conozio ninguna hazania sobre fern por lo que es invalido
+esCadenaInspiracion([X]).
+esCadenaInspiracion([Persona1,Persona2 | Resto]):-
+    inspiroHeroe(Persona2,Persona1),
+    esCadenaInspiracion([Persona2 | Resto]).
+
 
 
 :- begin_tests(tpIntegrador, []).
