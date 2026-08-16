@@ -383,25 +383,18 @@ esConmemorada(
         not(pasoAlOlvido(destruirDemonioAura, 1440)).
 
     test("Una estatua esta en buen estado, segun su material, si fue construida/tuvo mantenimiento reciente dentro del rango de duracion del material"):-
-        
         %Lawine recuerda destruir al rey demonio en 1400 ya que vive en Auberst y allí hay una estatua en buen estado conmemorando la hazaña
         estaEnBuenEstado(elEquipoDeHeroes, 1400),
-
         %en 1390 Lawine no recuerda destruir al rey demonio porque la estatua no se encuentra en buen estado en ese momento
         not(estaEnBuenEstado(elEquipoDeHeroes, 1390)),
-
         %En 1000 la estatua elHeroeDelSur no habia sido construida, no puede estar en buen estado
         not(estaEnBuenEstado(elHeroeDelSur, 1000)), 
-
         %En 1360 la estatua de marmol elHeroeDelSur q se construyo en 1340 y no tuvo mantenimiento hasta 1410 sigue en buen estado, no pasaron 30 anios
         estaEnBuenEstado(elHeroeDelSur, 1360),
-
         %En 1371 la estatua de marmol elHeroeDelSur q se construyo en 1340 y no tuvo mantenimiento hasta 1410 ya esta en mal estado
         not(estaEnBuenEstado(elHeroeDelSur, 1371)), 
-
         %En 1420 la estatua de marmol elHeroeDelSur tuvo mantenimiento en 1410 y sigue en buen estado, no pasaron 30 anios
         estaEnBuenEstado(elHeroeDelSur, 1420),
-
         %Pero en 1441 dejo de tener mantenimiento, esta en mal estado
         not(estaEnBuenEstado(elHeroeDelSur, 1441)).
 
