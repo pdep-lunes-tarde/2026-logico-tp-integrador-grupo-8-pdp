@@ -374,7 +374,7 @@ esHazania(recuperarGatoPerdido).
 % I )
 puebloRecuerdaHazaniaEnAnio(NombreHazania, Pueblo, Anio):-
     persona(Persona, Pueblo, AnioNacimiento, _),
-    recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio).
+    recuerdaHazania(Persona, NombreHazania, Anio).
 % II ) 
 leyeronPaginasEnAnio(Pueblo, Total, Anio):-
     esPueblo(Pueblo),
@@ -433,7 +433,7 @@ hazaniaEsImportanteEnPueblo(Pueblo,NombreHazania,Anio):-
     esHazania(NombreHazania),
     forall(
         (persona(Persona, Pueblo, _, _), estaVivoEnAnio(Persona, Anio)),    % Para toda persona de un pueblo y que siga viva durante cierto anio
-        recuerdaHazaniaEnAnio(Persona, NombreHazania, Anio)                 % recuerda la hazania
+        recuerdaHazania(Persona, NombreHazania, Anio)                 % recuerda la hazania
     ).
 %   VII
 nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio):-
