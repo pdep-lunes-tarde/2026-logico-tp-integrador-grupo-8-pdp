@@ -85,13 +85,13 @@ conocioHazania(
 
 % CASO DIA FESTIVO
 
-conocioHazania(Persona, AnioDesde, porDiaFestivo, hazania(NombreHazania, _, _)):-
+conocioHazania(Persona, AnioDesde, porDiaFestivo, hazania(NombreHazania, Donde, Quienes)):-
     
     %Garantizo inversibilidad respecto de Persona (y unifico el pueblo en que nacio)
     persona(Persona, Pueblo, AnioNacimiento, _),
 
     %Verifico si existe una festividad en dicho pueblo que conmemore la Hazania
-    esConmemorada(hazania(NombreHazania, _, _), Pueblo, AnioDesde, diaFestivo),
+    esConmemorada(hazania(NombreHazania, Donde, Quienes), Pueblo, AnioDesde, diaFestivo),
 
     %Verifico si la festividad se empezo a celebrar luego de su nacimiento (La conoce desde que se empezo a celebrar)
     AnioDesde > AnioNacimiento,
@@ -99,13 +99,13 @@ conocioHazania(Persona, AnioDesde, porDiaFestivo, hazania(NombreHazania, _, _)):
     %Verifico que siga vivo en dicho Anio
     estaVivoEnAnio(Persona,AnioDesde).
 
-conocioHazania(Persona, AnioNacimiento, porDiaFestivo, hazania(NombreHazania, _, _)):-
+conocioHazania(Persona, AnioNacimiento, porDiaFestivo, hazania(NombreHazania, Donde, Quienes)):-
     
     %Garantizo inversibilidad respecto de Persona (y unifico el pueblo en que nacio)
     persona(Persona, Pueblo, AnioNacimiento, _),
 
     %Verifico si existe una festividad en dicho pueblo que conmemore la Hazania
-    esConmemorada(hazania(NombreHazania, _, _), Pueblo, AnioDesde, diaFestivo),
+    esConmemorada(hazania(NombreHazania, Donde, Quienes), Pueblo, AnioDesde, diaFestivo),
 
     %Verifico si la festividad se empezo antes/el mismo anio de su nacimiento (La conoce desde que nacio)
     AnioDesde =< AnioNacimiento.
@@ -113,13 +113,13 @@ conocioHazania(Persona, AnioNacimiento, porDiaFestivo, hazania(NombreHazania, _,
 
 % CASO ESTATUA
 
-conocioHazania(Persona, AnioDesde, porEstatua(NombreEstatua),hazania(NombreHazania, _, _)):-
+conocioHazania(Persona, AnioDesde, porEstatua(NombreEstatua),hazania(NombreHazania, Donde, Quienes)):-
 
     %Garantizo inversibilidad respecto de Persona (y unifico el pueblo en que nacio)
     persona(Persona, Pueblo, AnioNacimiento, _),
 
     %Verifico si existe una estatua en dicho pueblo que conmemore la Hazania
-    esConmemorada(hazania(NombreHazania, _, _), Pueblo, AnioDesde, estatua(NombreEstatua, _, _)),
+    esConmemorada(hazania(NombreHazania, Donde, Quienes), Pueblo, AnioDesde, estatua(NombreEstatua, _, _)),
 
     %Verifico si la estatua se construyo luego de su nacimiento (La cnoce desde que se construyo)
     AnioDesde > AnioNacimiento,
@@ -127,13 +127,13 @@ conocioHazania(Persona, AnioDesde, porEstatua(NombreEstatua),hazania(NombreHazan
     %Verifico que este vivo cuando se construyo la estatua
     estaVivoEnAnio(Persona,AnioDesde). 
 
-conocioHazania(Persona, AnioNacimiento, porEstatua(NombreEstatua),hazania(NombreHazania, _, _)):-
+conocioHazania(Persona, AnioNacimiento, porEstatua(NombreEstatua),hazania(NombreHazania, Donde, Quienes)):-
     
     %Garantizo inversibilidad respecto de Persona (y unifico el pueblo en que nacio)
     persona(Persona, Pueblo, AnioNacimiento, _),
 
     %Verifico si existe una estatua en dicho pueblo que conmemore la Hazania
-    esConmemorada(hazania(NombreHazania, _, _), Pueblo, AnioDesde, estatua(NombreEstatua, _, _)),
+    esConmemorada(hazania(NombreHazania, Donde, Quienes), Pueblo, AnioDesde, estatua(NombreEstatua, _, _)),
 
     %Verifico si la estatua se construyo antes/el mismo anio de su nacimiento (La conoce desde que nacio)
     AnioDesde =< AnioNacimiento.
@@ -147,7 +147,7 @@ recuerdaHazania(NombreDePersona, NombreHazania, Anio):-
 
     %La debe haber conocido en algun momento
 
-    conocioHazania(NombreDePersona, AnioConocio, Como,hazania(NombreHazania, _, _)),
+    conocioHazania(NombreDePersona, AnioConocio, Como,hazania(NombreHazania, Donde, Quienes)),
 
     %El Anio debe ser mayor al anio en que la conocio (Usando between garantizo que sea inversible respecto de Anio)
 
@@ -406,7 +406,6 @@ listaHazaniasPorComoLaConocio(Pueblo, Lista, ComoLaConocio ,Anio):-
         (persona(Persona,Pueblo,_,_),  conocioHazania(Persona, Anio, ComoLaConocio,hazania(Hazania, _, _))),
         Lista
     ).
-
 hayMasHazaniasEscuchadas(ListaEscuchadas,ListaPresenciadas,ListaLeidas):-
     length(ListaEscuchadas, CantEscuchadas),
     length(ListaPresenciadas, CantPresenciadas),
@@ -450,6 +449,15 @@ puebloViveTiempoSinPresedente(Pueblo, Anio):-
         hazaniaEsImportanteEnPueblo(Pueblo, Hazania, Anio),       % Para toda hazania importante de un pueblo durante un anio
         not(nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio))  % Al menos uno la presencio
         ).
+
+
+% punto 5
+% a)
+esHeroe(Persona):-  % devuelve muchos true
+    persona(Persona, _, _ , _),
+    conocioHazania(_,_,_, hazania(_, _, Participantes) ),
+    member(Persona, Participantes).
+
 
 :- begin_tests(tpIntegrador, []).
 
