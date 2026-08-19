@@ -15,6 +15,9 @@ persona(wirbel,  klares,  1350, humano).
 persona(lernen,  auberst, 1315, humano).
 persona(frieren, weise,    100, elfo).
 persona(eisen,   riegel,  1150, enano).
+ % No estaban en el enunciado de la parte I pero hace falta agregarlos
+persona(himmel,    ende,    1200, elfo).       
+persona(heiter,    ende,    1200, enano).
 
 % 1 - b
 
@@ -147,15 +150,15 @@ recuerdaHazania(NombreDePersona, NombreHazania, Anio):-
 
     %La debe haber conocido en algun momento
 
-    conocioHazania(NombreDePersona, AnioConocio, Como,hazania(NombreHazania, Donde, Quienes)),
-
-    %El Anio debe ser mayor al anio en que la conocio (Usando between garantizo que sea inversible respecto de Anio)
-
-    between(AnioConocio, inf, Anio),
+    conocioHazania(NombreDePersona, AnioConocio, Como,hazania(NombreHazania, _, _)),
 
     %Debe estar vivo en dicho Anio
 
     estaVivoEnAnio(NombreDePersona,Anio),
+
+    %El Anio debe ser mayor al anio en que la conocio (Usando between garantizo que sea inversible respecto de Anio)
+
+    Anio>=AnioConocio, %No uso between porque estaVivoEnAnio ya es inversible respecto de Anio
 
     %Todavia recuerda la Hazania segun como la conocio
 
@@ -357,94 +360,158 @@ esConmemorada(
 %%%   ------------------    Parte 2       --------------------
 
 
+esPueblo(Pueblo):-persona(_, Pueblo, _, _).
 
-esPueblo(auberst).
-esPueblo(ende).
-esPueblo(weise).
-esPueblo(riegel).
-esPueblo(klares).
 
-esHazania(rescatarHermanaDeWirbel).
-esHazania(destruirDemonioAura).
-esHazania(destruirReyDemonio).
-esHazania(recuperarGatoPerdido).
+esHazania(Hazania):-conocioHazania(_,_,_,hazania(Hazania, _, _)).
 
 
 
 % I )
 puebloRecuerdaHazaniaEnAnio(NombreHazania, Pueblo, Anio):-
-    persona(Persona, Pueblo, AnioNacimiento, _),
-    recuerdaHazania(Persona, NombreHazania, Anio).
+
+    persona(Persona, Pueblo, _, _),
+
+    recuerdaHazania(Persona, NombreHazania, Anio).%Ya es inversible respecto de Anio
+
 % II ) 
-leyeronPaginasEnAnio(Pueblo, Total, Anio):-
+leyeronPaginasEnAnio(Pueblo, Total, Anio):- 
+
     esPueblo(Pueblo),
-    persona(Persona, Pueblo, _, _ ),
+
+    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
+    
     findall(
         CantPaginas ,
-        conocioHazania(Persona, Anio, leyo(paginas(CantPaginas)),_),
+        (%Consulta existencial de todas las personas del pueblo que leyeron paginas dicho anio
+            persona(Persona, Pueblo, _, _ ),
+            conocioHazania(Persona, Anio, leyo(paginas(CantPaginas)),_)
+        ),
         ListaCantPag
         ),
+    
     sum_list(ListaCantPag, Total).
-% III)
-puebloLeeMasQueOtro(Pueblo1, Pueblo2, Anio):-
-    esPueblo(Pueblo1),
-    esPueblo(Pueblo2),
-    leyeronPaginasEnAnio(Pueblo1, Total1, Anio),
-    leyeronPaginasEnAnio(Pueblo2, Total2, Anio),
-    Total1 > Total2.
 
+% III)
 puebloQueMasLeeEnAnio(Pueblo, Anio):-
     esPueblo(Pueblo),
+
+    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
+
     forall(
         ( esPueblo(OtroPueblo), OtroPueblo \=  Pueblo ),
         puebloLeeMasQueOtro(Pueblo,OtroPueblo,Anio)
         ).
-%  IV)
-listaHazaniasPorComoLaConocio(Pueblo, Lista, ComoLaConocio ,Anio):-
-    findall(
-    Hazania,                    % Lista de todas las hazania que una persona conocio durante cierto anio de una manera particular(ComoLaConocio)
-        (persona(Persona,Pueblo,_,_),  conocioHazania(Persona, Anio, ComoLaConocio,hazania(Hazania, _, _))),
-        Lista
-    ).
-hayMasHazaniasEscuchadas(ListaEscuchadas,ListaPresenciadas,ListaLeidas):-
-    length(ListaEscuchadas, CantEscuchadas),
-    length(ListaPresenciadas, CantPresenciadas),
-    length(ListaLeidas, CantLeidas),
-    CantEscuchadas > CantLeidas,
-    CantEscuchadas > CantPresenciadas.
+    
 
+puebloLeeMasQueOtro(Pueblo1, Pueblo2, Anio):-
+    
+    esPueblo(Pueblo1),
+    esPueblo(Pueblo2),
+
+    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
+
+    leyeronPaginasEnAnio(Pueblo1, Total1, Anio),
+    leyeronPaginasEnAnio(Pueblo2, Total2, Anio),
+
+    Total1 > Total2.
+
+%  IV)
+
+%Compara la cantidad de hazanias que fueron escuchadas en dicho Anio con
+%las que fueron conocidas por otro metodo(Presenciadas, leidas, por festividades o por estatuas)
 esPuebloMusicalEnAnio(Pueblo,Anio):-
     esPueblo(Pueblo),
-    listaHazaniasPorComoLaConocio(Pueblo, ListaEscuchadas, escuchoCancion, Anio),
-    listaHazaniasPorComoLaConocio(Pueblo, ListaPresenciadas, presencio, Anio),
-    listaHazaniasPorComoLaConocio(Pueblo, ListaLeidas, leyo(_), Anio),
-    hayMasHazaniasEscuchadas(ListaEscuchadas,ListaPresenciadas,ListaLeidas).
+    
+    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
+
+    cantHazaniasEscuchadas(Pueblo, Anio, CantEscuchadas),
+
+    cantHazaniasOtraForma(Pueblo, Anio, CantidadOtraForma),
+
+    CantEscuchadas > CantidadOtraForma.
+
+
+%Genera una lista de las Hazanias que fueron conocidas mediante canciones dicho Anio y luego calcula su longitud
+cantHazaniasEscuchadas(Pueblo, Anio, CantEscuchadas):-
+
+    esPueblo(Pueblo),
+    
+    findall(
+            HazaniaEscuchada,
+            (   %Consulta existencial de las personas del pueblo que conocieron alguna hazania en el Anio por una cancion
+                persona(Persona, Pueblo, _, _),
+
+                conocioHazania(Persona, Anio, escuchoCancion, HazaniaEscuchada)
+            ),
+            ListaEscuchadas    
+    
+    ),
+
+    length(ListaEscuchadas, CantEscuchadas).
+
+%Genera una lista de las Hazanias que fueron conocidas dicho Anio pero no mediante una cancion y luego calcula su longitud
+cantHazaniasOtraForma(Pueblo, Anio, CantidadOtraForma):-
+
+    esPueblo(Pueblo),
+
+    findall(
+            HazaniaNoEscuchada,
+            (   %Consulta existencial de las personas del pueblo que conocieron alguna hazania en el Anio por un modo distinto a una cancion
+                persona(Persona, Pueblo, _, _),
+
+                conocioHazania(Persona, Anio, Como, HazaniaNoEscuchada),
+
+                Como\=escuchoCancion
+            ),
+            ListaHazaniasNoEsuchadas    
+    
+    ),
+
+    length(ListaHazaniasNoEsuchadas, CantidadOtraForma).
+
+
 %   V)
 esPuebloChismosoEnAnio(Pueblo,Anio):-
     esPueblo(Pueblo),
+
+    between(0, inf, Anio), %Garantizo inversibilidad respecto de Anio
+
     forall(
         (persona(Persona, Pueblo, _, _), conocioHazania(Persona, Anio, _,hazania(Hazania, _, _)) ),  % Para toda hazania conocida por alguien del pueblo
         not(estaCorroborada(Hazania))                                                                % esa hazania no esta corroborrada
-        ).    
+        ).  
+  
 %   VI)
 hazaniaEsImportanteEnPueblo(Pueblo,NombreHazania,Anio):-
     esPueblo(Pueblo),
+
     esHazania(NombreHazania),
+
+    between(0, inf, Anio), %Garantizo inversibilidad respecto de Anio
+
     forall(
-        (persona(Persona, Pueblo, _, _), estaVivoEnAnio(Persona, Anio)),    % Para toda persona de un pueblo y que siga viva durante cierto anio
+        (persona(Persona, Pueblo, _, _), estaVivoEnAnio(Persona, Anio)),    % Para toda persona de un pueblo que siga viva durante cierto anio
         recuerdaHazania(Persona, NombreHazania, Anio)                 % recuerda la hazania
     ).
+
 %   VII
 nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio):-
     esPueblo(Pueblo),
     esHazania(Hazania),
+
+    between(0, inf, Anio), %Garantizo inversibilidad respecto de Anio
+
     forall(
         persona(Persona,Pueblo,_,_),                                          % Para toda persona del pueblo durante cierto anio
         not(conocioHazania(Persona, Anio, presencio,hazania(Hazania,_,_)))    % ninguna de esas personas PRESENCIO la hazania
         ).
 
-puebloViveTiempoSinPresedente(Pueblo, Anio):-
+puebloViveTiempoSinPrecedente(Pueblo, Anio):-
     esPueblo(Pueblo),
+
+    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
+
     forall(
         hazaniaEsImportanteEnPueblo(Pueblo, Hazania, Anio),       % Para toda hazania importante de un pueblo durante un anio
         not(nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio))  % Al menos uno la presencio
@@ -453,9 +520,6 @@ puebloViveTiempoSinPresedente(Pueblo, Anio):-
 
 % punto 5
 % a)
-
-persona(himmel,    ende,    1200, elfo).        % No estaban en el enunciado de la parte I pero hace falta agregarlos
-persona(heiter,    ende,    1200, enano).
 
 esHeroe(Persona):-
     persona(Persona, _, _ , _),
@@ -470,12 +534,56 @@ inspiroHeroe(Heroe, Persona):-
     member(Persona, Participantes),
     Persona \= Heroe.
 
-% segun el enunciado Himmel → Frieren → Fern → Denken deberia ser valida pero denken
-% no es ni heroe ni conozio ninguna hazania sobre fern por lo que es invalido
-esCadenaInspiracion([X]).
+% segun el enunciado Himmel → Frieren → Fern → Denken deberia ser valida pero denken himmel
+% Denken es heroe y lo inspiro fern , coincide
+
+
+/*
+
+    Modelamos la cadena de inspiracion como una lista
+
+
+    El primer elemento es el heroe inicial
+
+
+    Para cada heroe de la lista se debe cumplir que sea inspiracion del siguiente elemento
+
+
+
+    Caso base --> Nadie lo inspiro --> Cadena con un solo elemente (el heroe)
+
+    Siguiente caso --> Multiples elementos:
+        El primer elemento es el heroe
+
+        Despues preguntar si la cola es cadena de inspiracion
+
+    esCadenaInspiracion([X]).
 esCadenaInspiracion([Persona1,Persona2 | Resto]):-
     inspiroHeroe(Persona2,Persona1),
     esCadenaInspiracion([Persona2 | Resto]).
+
+*/
+
+/*
+
+    1| elemento --> La persona
+
+    2° elemento --> El heroe que fue inspirado por la persona (Puede ser [])
+
+    3° elemento --> La cadena de inspiracion del heroe
+*/
+
+%si NO inspiro a nadie se corta la cadena
+cadenaDeInspiracionDe(Persona, []):- not(inspiroHeroe(_, Persona)).
+
+%si inspiro a alguien la persona que le sigue debe haber sido inspirado por el primero
+cadenaDeInspiracionDe(Persona, [Persona, Heroe | CadenaDeInspiracionDelHeroe]):-
+
+    inspiroHeroe(Heroe, Persona),
+
+    cadenaDeInspiracionDe(Heroe, CadenaDeInspiracionDelHeroe),
+
+    not(member(Persona, CadenaDeInspiracionDelHeroe)).
 
 
 
@@ -508,7 +616,7 @@ esCadenaInspiracion([Persona1,Persona2 | Resto]):-
         pasoAlOlvido(destruirDemonioAura, 1460),
         not(pasoAlOlvido(destruirDemonioAura, 1440)).
 
-    test("Una estatua esta en buen estado, segun su material, si fue construida/tuvo mantenimiento reciente dentro del rango de duracion del material"):-
+    test("Una estatua esta en buen estado, segun su material, si fue construida/tuvo mantenimiento reciente dentro del rango de duracion del material", nondet):-
         %Lawine recuerda destruir al rey demonio en 1400 ya que vive en Auberst y allí hay una estatua en buen estado conmemorando la hazaña
         estaEnBuenEstado(elEquipoDeHeroes, 1400),
         %en 1390 Lawine no recuerda destruir al rey demonio porque la estatua no se encuentra en buen estado en ese momento
@@ -557,7 +665,16 @@ esCadenaInspiracion([Persona1,Persona2 | Resto]):-
         not(hazaniaEsImportanteEnPueblo(weise, recuperarGatoPerdido,1400)).
 
     test("Un pueblo vive tiempos sin precedentes si todas las hazanias importantes fueron presenciadas", nondet):-
-        puebloViveTiempoSinPresedente(klares, 1390),
-        not(puebloViveTiempoSinPresedente(weise, 1400)).
+        puebloViveTiempoSinPrecedente(klares, 1390),
+        not(puebloViveTiempoSinPrecedente(weise, 1400)).
+
+    test("Una persona es Heroe si participo enn una hazania conocida", nondet):-
+        esHeroe(frieren),
+        not(esHeroe(wirbel)).
+
+    test("Una persona inspiro a un heroe si participo en alguna hazania que el heroe conocio", nondet):-
+        inspiroHeroe(fern, frieren),
+        inspiroHeroe(frieren, stark),
+        not(inspiroHeroe(eisen, _)).
 
 :- end_tests(tpIntegrador).
