@@ -526,7 +526,9 @@ esHeroe(Persona):-
     conocioHazania(_,_,_, hazania(_, _, Participantes) ),
     member(Persona, Participantes).
 
-inspiroHeroe(Heroe, Persona):-
+% b)
+
+inspiroAHeroe(Persona, Heroe):-
     persona(Persona,_,_,_),
     persona(Heroe,_,_,_),
     esHeroe(Heroe),
@@ -534,56 +536,44 @@ inspiroHeroe(Heroe, Persona):-
     member(Persona, Participantes),
     Persona \= Heroe.
 
-% segun el enunciado Himmel → Frieren → Fern → Denken deberia ser valida pero denken himmel
-% Denken es heroe y lo inspiro fern , coincide
-
-
 /*
+    La cadena de inspiracion es una lista
 
-    Modelamos la cadena de inspiracion como una lista
+    El 1° elemento de la cadena es Persona1
 
+    El 2° elemento puede ser:
+        - [] 
+        - La cadena de inspiracion de Persona2. Persona1 inspiro a Persona2
 
-    El primer elemento es el heroe inicial
-
-
-    Para cada heroe de la lista se debe cumplir que sea inspiracion del siguiente elemento
-
-
-
-    Caso base --> Nadie lo inspiro --> Cadena con un solo elemente (el heroe)
-
-    Siguiente caso --> Multiples elementos:
-        El primer elemento es el heroe
-
-        Despues preguntar si la cola es cadena de inspiracion
-
-    esCadenaInspiracion([X]).
-esCadenaInspiracion([Persona1,Persona2 | Resto]):-
-    inspiroHeroe(Persona2,Persona1),
-    esCadenaInspiracion([Persona2 | Resto]).
+    No puede repetir a los q estaban antes
 
 */
 
-/*
+% Esta alternativa cumple todo: No se repiten personas, permite consultas individuales (verdaderas y falsas) y evito los casos de cadenas vacias o de un solo elemento
+% Lo unico malo es que tira infinitas opciones, por lo que no termina siendo totalmente inversible (se queda iterando sobre el priero que encuentre)
 
-    1| elemento --> La persona
+cadenaDeInspiracionDe(Persona1, [Persona1| CadenaDePersona2]):-
 
-    2° elemento --> El heroe que fue inspirado por la persona (Puede ser [])
+    %esHeroe(Persona1),
 
-    3° elemento --> La cadena de inspiracion del heroe
-*/
+    inspiroAHeroe(Persona1, Persona2),
 
-%si NO inspiro a nadie se corta la cadena
-cadenaDeInspiracionDe(Persona, []):- not(inspiroHeroe(_, Persona)).
+    seguirCadenaDeSinRepetir(Persona2, CadenaDePersona2, [Persona1]).
 
-%si inspiro a alguien la persona que le sigue debe haber sido inspirado por el primero
-cadenaDeInspiracionDe(Persona, [Persona, Heroe | CadenaDeInspiracionDelHeroe]):-
 
-    inspiroHeroe(Heroe, Persona),
+%Puede cortar en 2 elementos
+seguirCadenaDeSinRepetir(Persona, [Persona], _).
 
-    cadenaDeInspiracionDe(Heroe, CadenaDeInspiracionDelHeroe),
+%Puede seguir buscando, asegurandose que no se repitan los elementos previos
+seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevias):-
 
-    not(member(Persona, CadenaDeInspiracionDelHeroe)).
+    %esHeroe(Persona1),
+
+    inspiroAHeroe(Persona1, Persona2),
+
+    not(member(Persona2, PersonasPrevias)),
+
+    seguirCadenaDeSinRepetir(Persona2, CadenaDePersona2, [Persona1 | PersonasPrevias]).
 
 
 
@@ -673,8 +663,15 @@ cadenaDeInspiracionDe(Persona, [Persona, Heroe | CadenaDeInspiracionDelHeroe]):-
         not(esHeroe(wirbel)).
 
     test("Una persona inspiro a un heroe si participo en alguna hazania que el heroe conocio", nondet):-
-        inspiroHeroe(fern, frieren),
-        inspiroHeroe(frieren, stark),
-        not(inspiroHeroe(eisen, _)).
+        inspiroAHeroe(frieren, fern),
+        inspiroAHeroe(stark, frieren),
+        not(inspiroAHeroe(_, eisen)).
+    test("La cadena de inspiracion de un heroe son todos los caminos por los q inspiro a otros heroes", nondet):-
+        %Himmel → Fern → Frieren → Denken es una cadena de inspiración válida
+        cadenaDeInspiracionDe(himmel, [himmel, fern, frieren]),
+        %Denken → Frieren no es una cadena de inspiración válida porque Denken no inspiró a Frieren
+        not(cadenaDeInspiracionDe(denken, [denken, frieren])),
+        %Frieren → Fern → Frieren no es una cadena de inspiración válida ya que se repite 2 veces a un héroe
+        not(cadenaDeInspiracionDe(frieren, [frieren, fern, frieren])).
 
 :- end_tests(tpIntegrador).
