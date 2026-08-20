@@ -365,6 +365,7 @@ esPueblo(Pueblo):-persona(_, Pueblo, _, _).
 
 esHazania(Hazania):-conocioHazania(_,_,_,hazania(Hazania, _, _)).
 
+esMetodo(Metodo):-conocioHazania(_,_,Metodo,hazania(_, _, _)).
 
 
 % I )
@@ -425,51 +426,32 @@ esPuebloMusicalEnAnio(Pueblo,Anio):-
     
     %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
 
-    cantHazaniasEscuchadas(Pueblo, Anio, CantEscuchadas),
+    cantHazaniasEscuchadasPorMetodo(Pueblo, Anio, CantEscuchadas, escuchoCancion),
 
-    cantHazaniasOtraForma(Pueblo, Anio, CantidadOtraForma),
+    cantHazaniasEscuchadasPorMetodo(Pueblo, Anio, CantLeidas, leyo(_)),
+    cantHazaniasEscuchadasPorMetodo(Pueblo, Anio, CantPresenciadas, presencio),
 
-    CantEscuchadas > CantidadOtraForma.
+    CantEscuchadas > (CantPresenciadas + CantLeidas).
 
 
 %Genera una lista de las Hazanias que fueron conocidas mediante canciones dicho Anio y luego calcula su longitud
-cantHazaniasEscuchadas(Pueblo, Anio, CantEscuchadas):-
+cantHazaniasEscuchadasPorMetodo(Pueblo, Anio, CantHazanias, Metodo):-
 
     esPueblo(Pueblo),
+    esMetodo(Metodo),
     
     findall(
             HazaniaEscuchada,
             (   %Consulta existencial de las personas del pueblo que conocieron alguna hazania en el Anio por una cancion
                 persona(Persona, Pueblo, _, _),
 
-                conocioHazania(Persona, Anio, escuchoCancion, HazaniaEscuchada)
+                conocioHazania(Persona, Anio, Metodo, HazaniaEscuchada)
             ),
-            ListaEscuchadas    
+            ListaHazanias    
     
     ),
 
-    length(ListaEscuchadas, CantEscuchadas).
-
-%Genera una lista de las Hazanias que fueron conocidas dicho Anio pero no mediante una cancion y luego calcula su longitud
-cantHazaniasOtraForma(Pueblo, Anio, CantidadOtraForma):-
-
-    esPueblo(Pueblo),
-
-    findall(
-            HazaniaNoEscuchada,
-            (   %Consulta existencial de las personas del pueblo que conocieron alguna hazania en el Anio por un modo distinto a una cancion
-                persona(Persona, Pueblo, _, _),
-
-                conocioHazania(Persona, Anio, Como, HazaniaNoEscuchada),
-
-                Como\=escuchoCancion
-            ),
-            ListaHazaniasNoEsuchadas    
-    
-    ),
-
-    length(ListaHazaniasNoEsuchadas, CantidadOtraForma).
-
+    length(ListaHazanias, CantHazanias).
 
 %   V)
 esPuebloChismosoEnAnio(Pueblo,Anio):-
