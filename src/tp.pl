@@ -534,9 +534,9 @@ inspiroAHeroe(Persona, Heroe):-
 % Esta alternativa cumple todo: No se repiten personas, permite consultas individuales (verdaderas y falsas) y evito los casos de cadenas vacias o de un solo elemento
 % Lo unico malo es que tira infinitas opciones, por lo que no termina siendo totalmente inversible (se queda iterando sobre el priero que encuentre)
 
-cadenaDeInspiracionDe(Persona1, [Persona1| CadenaDePersona2]):-
+esCadenaDeInspiracion([Persona1| CadenaDePersona2]):-
 
-    %esHeroe(Persona1),
+    esHeroe(Persona1),
 
     inspiroAHeroe(Persona1, Persona2),
 
@@ -650,10 +650,10 @@ seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevia
         not(inspiroAHeroe(_, eisen)).
     test("La cadena de inspiracion de un heroe son todos los caminos por los q inspiro a otros heroes", nondet):-
         %Himmel → Fern → Frieren → Denken es una cadena de inspiración válida
-        cadenaDeInspiracionDe(himmel, [himmel, fern, frieren]),
+        esCadenaDeInspiracion([himmel, fern, frieren]),
         %Denken → Frieren no es una cadena de inspiración válida porque Denken no inspiró a Frieren
-        not(cadenaDeInspiracionDe(denken, [denken, frieren])),
+        not(esCadenaDeInspiracion([denken, frieren])),
         %Frieren → Fern → Frieren no es una cadena de inspiración válida ya que se repite 2 veces a un héroe
-        not(cadenaDeInspiracionDe(frieren, [frieren, fern, frieren])).
+        not(esCadenaDeInspiracion([frieren, fern, frieren])).
 
 :- end_tests(tpIntegrador).
