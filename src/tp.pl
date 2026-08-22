@@ -418,40 +418,61 @@ puebloLeeMasQueOtro(Pueblo1, Pueblo2, Anio):-
     Total1 > Total2.
 
 %  IV)
-
-%Compara la cantidad de hazanias que fueron escuchadas en dicho Anio con
-%las que fueron conocidas por otro metodo(Presenciadas, leidas, por festividades o por estatuas)
+%Compara la cantidad de hazanias que se recuerdan en dicho anio por haber sido escuchadas en canciones con
+%las que se recuerdan pero fueron conocidas por otro metodo(Presenciadas, leidas, por festividades o por estatuas)
 esPuebloMusicalEnAnio(Pueblo,Anio):-
     esPueblo(Pueblo),
     
     %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
 
-    cantHazaniasEscuchadasPorMetodo(Pueblo, Anio, CantEscuchadas, escuchoCancion),
+    cantHazaniasEscuchadas(Pueblo, Anio, CantEscuchadas),
 
-    cantHazaniasEscuchadasPorMetodo(Pueblo, Anio, CantLeidas, leyo(_)),
-    cantHazaniasEscuchadasPorMetodo(Pueblo, Anio, CantPresenciadas, presencio),
+    cantHazaniasOtraForma(Pueblo, Anio, CantidadOtraForma),
 
-    CantEscuchadas > (CantPresenciadas + CantLeidas).
+    CantEscuchadas > CantidadOtraForma.
 
 
-%Genera una lista de las Hazanias que fueron conocidas mediante canciones dicho Anio y luego calcula su longitud
-cantHazaniasEscuchadasPorMetodo(Pueblo, Anio, CantHazanias, Metodo):-
+%Genera una lista de las Hazanias que se recuerdan en dicho Anio y se conocieron mediante canciones y luego calcula su longitud
+cantHazaniasEscuchadas(Pueblo, Anio, CantEscuchadas):-
 
     esPueblo(Pueblo),
-    esMetodo(Metodo),
     
     findall(
             HazaniaEscuchada,
-            (   %Consulta existencial de las personas del pueblo que conocieron alguna hazania en el Anio por una cancion
+            (   %Consulta existencial de las personas del pueblo que recuerdan alguna hazania en el Anio que conocieron por una cancion
                 persona(Persona, Pueblo, _, _),
 
-                conocioHazania(Persona, Anio, Metodo, HazaniaEscuchada)
+                recuerdaHazania(Persona, HazaniaEscuchada, Anio),
+
+                conocioHazania(Persona, _, escuchoCancion, hazania(HazaniaEscuchada, _, _))
             ),
-            ListaHazanias    
+            ListaEscuchadas    
     
     ),
 
-    length(ListaHazanias, CantHazanias).
+    length(ListaEscuchadas, CantEscuchadas).
+
+%Genera una lista de las Hazanias que fueron conocidas dicho Anio pero no mediante una cancion y luego calcula su longitud
+cantHazaniasOtraForma(Pueblo, Anio, CantidadOtraForma):-
+
+    esPueblo(Pueblo),
+
+    findall(
+            HazaniaNoEscuchada,
+            (   %Consulta existencial de las personas del pueblo que recuerdan alguna hazania en el Anio que concieron por un modo distinto a una cancion
+                persona(Persona, Pueblo, _, _),
+
+                recuerdaHazania(Persona, HazaniaNoEscuchada, Anio),
+
+                conocioHazania(Persona, Anio, Como, hazania(HazaniaNoEscuchada, _, _)),
+
+                Como\=escuchoCancion
+            ),
+            ListaHazaniasNoEscuchadas    
+    
+    ),
+
+    length(ListaHazaniasNoEscuchadas, CantidadOtraForma).
 
 %   V)
 esPuebloChismosoEnAnio(Pueblo,Anio):-
