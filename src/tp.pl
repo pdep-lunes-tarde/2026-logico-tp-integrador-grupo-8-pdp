@@ -379,8 +379,6 @@ puebloRecuerdaHazaniaEnAnio(NombreHazania, Pueblo, Anio):-
 leyeronPaginasEnAnio(Pueblo, Total, Anio):- 
 
     esPueblo(Pueblo),
-
-    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
     
     findall(
         CantPaginas ,
@@ -397,8 +395,6 @@ leyeronPaginasEnAnio(Pueblo, Total, Anio):-
 puebloQueMasLeeEnAnio(Pueblo, Anio):-
     esPueblo(Pueblo),
 
-    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
-
     forall(
         ( esPueblo(OtroPueblo), OtroPueblo \=  Pueblo ),
         puebloLeeMasQueOtro(Pueblo,OtroPueblo,Anio)
@@ -409,8 +405,6 @@ puebloLeeMasQueOtro(Pueblo1, Pueblo2, Anio):-
     
     esPueblo(Pueblo1),
     esPueblo(Pueblo2),
-
-    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
 
     leyeronPaginasEnAnio(Pueblo1, Total1, Anio),
     leyeronPaginasEnAnio(Pueblo2, Total2, Anio),
@@ -423,8 +417,6 @@ puebloLeeMasQueOtro(Pueblo1, Pueblo2, Anio):-
 esPuebloMusicalEnAnio(Pueblo,Anio):-
     esPueblo(Pueblo),
     
-    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
-
     cantHazaniasEscuchadas(Pueblo, Anio, CantEscuchadas),
 
     cantHazaniasOtraForma(Pueblo, Anio, CantidadOtraForma),
@@ -478,8 +470,6 @@ cantHazaniasOtraForma(Pueblo, Anio, CantidadOtraForma):-
 esPuebloChismosoEnAnio(Pueblo,Anio):-
     esPueblo(Pueblo),
 
-    between(0, inf, Anio), %Garantizo inversibilidad respecto de Anio
-
     forall(
         (persona(Persona, Pueblo, _, _), conocioHazania(Persona, Anio, _,hazania(Hazania, _, _)) ),  % Para toda hazania conocida por alguien del pueblo
         not(estaCorroborada(Hazania))                                                                % esa hazania no esta corroborrada
@@ -491,8 +481,6 @@ hazaniaEsImportanteEnPueblo(Pueblo,NombreHazania,Anio):-
 
     esHazania(NombreHazania),
 
-    between(0, inf, Anio), %Garantizo inversibilidad respecto de Anio
-
     forall(
         (persona(Persona, Pueblo, _, _), estaVivoEnAnio(Persona, Anio)),    % Para toda persona de un pueblo que siga viva durante cierto anio
         recuerdaHazania(Persona, NombreHazania, Anio)                 % recuerda la hazania
@@ -503,8 +491,6 @@ nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio):-
     esPueblo(Pueblo),
     esHazania(Hazania),
 
-    between(0, inf, Anio), %Garantizo inversibilidad respecto de Anio
-
     forall(
         persona(Persona,Pueblo,_,_),                                          % Para toda persona del pueblo durante cierto anio
         not(conocioHazania(Persona, Anio, presencio,hazania(Hazania,_,_)))    % ninguna de esas personas PRESENCIO la hazania
@@ -512,8 +498,6 @@ nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio):-
 
 puebloViveTiempoSinPrecedente(Pueblo, Anio):-
     esPueblo(Pueblo),
-
-    %No es inversible respecto del Anio, rompe si pongo un between(0, inf, Anio)
 
     forall(
         hazaniaEsImportanteEnPueblo(Pueblo, Hazania, Anio),       % Para toda hazania importante de un pueblo durante un anio
