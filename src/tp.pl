@@ -554,6 +554,71 @@ seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevia
 
     seguirCadenaDeSinRepetir(Persona2, CadenaDePersona2, [Persona1 | PersonasPrevias]).
 
+% punto 6
+
+/*
+
+Determinar un “equipo de los sueños” para un héroe, 
+que es un equipo que incluya a ese héroe y también 
+incluya antecesores, que son héroes de alguna cadena 
+de inspiración en la cual todos lo inspiraron.
+
+Debe ser totalmente inversible
+*/
+
+equipoSoniadoDe(Heroe, Equipo):-
+
+    %Garantizo inversibilidad respecto del heroe
+    esHeroe(Heroe),
+   
+    %Garantizo inversibilidad respecto del equipo
+    esEquipoDe(Heroe, Equipo),
+
+    %Ademas todos los miembros del equipo que no sean el heroe en cuestion deben haberlo inspirado (lo preceden)
+    todosSonAntecesoresDe(Heroe, Equipo).
+
+/*
+        PROBLEMAS PARA GARANTIZAR INVERSIBILIDAD RESPECTO DEL EQUIPO
+        
+        No puedo generar el equipo usando forall. Si solo tengo una clausula que busca una cadena que contenga al heroe y luego hace:
+
+        forall( 
+            member(Miembro, Equipo), 
+
+            member(Miembro, Cadena)
+        )
+        
+        ROMPE, porque forall NO ES INVERSIBLE RESPECTO DE EQUIPO
+
+
+        Tampoco puedo generarlo con findall. Si solo tengo una clausula que busca una cadena que contenga al heroe y luego hace:
+
+        findall(
+                Miembro,
+
+                %Consulta existencial que genera todos los miembros de la cadena que contiene al heroe,
+                member(Miembro, Cadena),
+
+                Equipo
+        )
+
+        No toma como validos los Equipos donde el orden de los miembros no coincide con los de la cadena
+
+        La consulta:
+        findall(Miembro, member(Miembro, [frieren, fern]), [fern, frieren]) --> Da FALSE
+*/  
+
+todosSonAntecesoresDe(Heroe, Equipo):-
+    forall(
+            %Genero todos los miembros del equipo que no son el heroe
+            (
+                member(Miembro, Equipo),
+                Miembro\=Heroe
+            ),
+
+            %Verifico que hayan inspirado al heroe
+            inspiroAHeroe(Miembro, Heroe)
+        ).
 
 :- begin_tests(tpIntegrador, []).
 
@@ -651,6 +716,15 @@ seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevia
         not(esCadenaDeInspiracion([denken, frieren])),
         %Frieren → Fern → Frieren no es una cadena de inspiración válida ya que se repite 2 veces a un héroe
         not(esCadenaDeInspiracion([frieren, fern, frieren])).
-        
-        
+    /* 
+    test("El equipo de los sueños de un heroe debe incluirlo a el y tambien a sus antecesores, que son heroes de alguna cadena de inspiracion en la cual todos lo inspiraron", nondet):-
+        %Para Fern, Fern + Himmel es un dream team válido
+        equipoSoniadoDe(fern, [fern, himmel]),
+        %También debe ser un dream team válido para Fern: Himmel + Fern. Es decir, debe ser válido sin importar el orden de los miembros en el equipo
+        equipoSoniadoDe(fern, [himmel, fern]),
+        %Para Fern, Fern sola no es un dream team válido ya que no incluye ningún antecesor
+        not(equipoSoniadoDe(fern, [fern])),
+        %Para Fern, Frieren sola no es un dream team válido ya que no se incluye a ella misma
+        not(equipoSoniadoDe(fern, [frieren])).
+       */ 
 :- end_tests(tpIntegrador).
