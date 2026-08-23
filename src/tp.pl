@@ -15,9 +15,7 @@ persona(wirbel,  klares,  1350, humano).
 persona(lernen,  auberst, 1315, humano).
 persona(frieren, weise,    100, elfo).
 persona(eisen,   riegel,  1150, enano).
- % No estaban en el enunciado de la parte I pero hace falta agregarlos
-persona(himmel,    ende,    1200, elfo).       
-persona(heiter,    ende,    1200, enano).
+
 
 % 1 - b
 
@@ -509,15 +507,12 @@ puebloViveTiempoSinPrecedente(Pueblo, Anio):-
 % a)
 
 esHeroe(Persona):-
-    persona(Persona, _, _ , _),
     conocioHazania(_,_,_, hazania(_, _, Participantes) ),
     member(Persona, Participantes).
 
 % b)
 
 inspiroAHeroe(Persona, Heroe):-
-    persona(Persona,_,_,_),
-    persona(Heroe,_,_,_),
     esHeroe(Heroe),
     conocioHazania(Heroe,_,_, hazania(_, _, Participantes) ),
     member(Persona, Participantes),
@@ -535,10 +530,7 @@ inspiroAHeroe(Persona, Heroe):-
     No puede repetir a los q estaban antes
 
 */
-
-% Esta alternativa cumple todo: No se repiten personas, permite consultas individuales (verdaderas y falsas) y evito los casos de cadenas vacias o de un solo elemento
-% Lo unico malo es que tira infinitas opciones, por lo que no termina siendo totalmente inversible (se queda iterando sobre el priero que encuentre)
-
+% c)
 esCadenaDeInspiracion([Persona1| CadenaDePersona2]):-
 
     esHeroe(Persona1),
@@ -561,7 +553,6 @@ seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevia
     not(member(Persona2, PersonasPrevias)),
 
     seguirCadenaDeSinRepetir(Persona2, CadenaDePersona2, [Persona1 | PersonasPrevias]).
-
 
 
 :- begin_tests(tpIntegrador, []).
@@ -660,5 +651,6 @@ seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevia
         not(esCadenaDeInspiracion([denken, frieren])),
         %Frieren → Fern → Frieren no es una cadena de inspiración válida ya que se repite 2 veces a un héroe
         not(esCadenaDeInspiracion([frieren, fern, frieren])).
-
+        
+        
 :- end_tests(tpIntegrador).
