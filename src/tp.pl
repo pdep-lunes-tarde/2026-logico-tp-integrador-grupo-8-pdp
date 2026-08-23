@@ -546,7 +546,6 @@ seguirCadenaDeSinRepetir(Persona, [Persona], _).
 %Puede seguir buscando, asegurandose que no se repitan los elementos previos
 seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevias):-
 
-    %esHeroe(Persona1),
 
     inspiroAHeroe(Persona1, Persona2),
 
@@ -556,78 +555,24 @@ seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevia
 
 % punto 6
 
-/*
-
-Determinar un “equipo de los sueños” para un héroe, 
-que es un equipo que incluya a ese héroe y también 
-incluya antecesores, que son héroes de alguna cadena 
-de inspiración en la cual todos lo inspiraron.
-
-Debe ser totalmente inversible
-*/
-
-equipoSoniadoDe(Heroe, Equipo):-
-
-    %Garantizo inversibilidad respecto del heroe
-    esHeroe(Heroe),
-   
-    %Garantizo inversibilidad respecto del equipo
-    %esEquipoDe(Heroe, Equipo),
-
-    %Ademas todos los miembros del equipo que no sean el heroe en cuestion deben haberlo inspirado (lo preceden)
-    todosSonAntecesoresDe(Heroe, Equipo).
-
-/*
-        PROBLEMAS PARA GARANTIZAR INVERSIBILIDAD RESPECTO DEL EQUIPO
-        
-        No puedo generar el equipo usando forall. Si solo tengo una clausula que busca una cadena que contenga al heroe y luego hace:
-
-        forall( 
-            member(Miembro, Equipo), 
-
-            member(Miembro, Cadena)
-        )
-        
-        ROMPE, porque forall NO ES INVERSIBLE RESPECTO DE EQUIPO
 
 
-        Tampoco puedo generarlo con findall. Si solo tengo una clausula que busca una cadena que contenga al heroe y luego hace:
-
-        findall(
-                Miembro,
-
-                %Consulta existencial que genera todos los miembros de la cadena que contiene al heroe,
-                member(Miembro, Cadena),
-
-                Equipo
-        )
-
-        No toma como validos los Equipos donde el orden de los miembros no coincide con los de la cadena
-
-        La consulta:
-        findall(Miembro, member(Miembro, [frieren, fern]), [fern, frieren]) --> Da FALSE
-*/  
-
-todosSonAntecesoresDe(Heroe, Equipo):-
-    forall(
-            %Genero todos los miembros del equipo que no son el heroe
-            (
-                member(Miembro, Equipo),
-                Miembro\=Heroe
-            ),
-
-            %Verifico que hayan inspirado al heroe
-            inspiroAHeroe(Miembro, Heroe)
-        ).
-
-
-%esEquipoSinAntencesores(Heroe,[Heroe]).
 dreamTeam(Heroe,Equipo):-
-    permutation(Cadena, Equipo),
-    length(Cadena,IndUltimoElem),
-    nth1(IndUltimoElem, Cadena, Heroe),
-    esCadenaDeInspiracion(Cadena).
-    forall(
+    %
+    %      H1  [H2, H1, H3]
+    %      exite cadena de inspiracion tal que sea una permutacion de los miembros del equipo  
+    %      y H1 sea el ultimo elemento
+    %      EJ:  [H2 -> H3 -> H1]
+    %      Ademas, todos los miembros del equipo deben haber inspirado al Heroe    
+    %      inpiroHeroe(H2,H1) y inspiroHeroe(H3,H1)
+    esCadenaDeInspiracion(Cadena),      %  existe una cadena de inpiracion valida tal que permutando sus elementos obtengo el equipo
+
+    permutation(Cadena, Equipo),        %  Genero una permutacion de los elementos de la cadena 
+
+    length(Cadena,IndUltimoElem),       %  
+    nth1(IndUltimoElem, Cadena, Heroe), %  Verifico que el ultimo elemento de la cadena sea el heroe
+
+    forall(                             %  Verfico que todo el equipo haya inspirado al heroe
         %Genero todos los miembros del equipo que no son el heroe            (
         (
             member(Miembro, Equipo),
