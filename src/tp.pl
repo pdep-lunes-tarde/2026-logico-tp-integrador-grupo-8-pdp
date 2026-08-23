@@ -572,7 +572,7 @@ equipoSoniadoDe(Heroe, Equipo):-
     esHeroe(Heroe),
    
     %Garantizo inversibilidad respecto del equipo
-    esEquipoDe(Heroe, Equipo),
+    %esEquipoDe(Heroe, Equipo),
 
     %Ademas todos los miembros del equipo que no sean el heroe en cuestion deben haberlo inspirado (lo preceden)
     todosSonAntecesoresDe(Heroe, Equipo).
@@ -619,6 +619,25 @@ todosSonAntecesoresDe(Heroe, Equipo):-
             %Verifico que hayan inspirado al heroe
             inspiroAHeroe(Miembro, Heroe)
         ).
+
+
+%esEquipoSinAntencesores(Heroe,[Heroe]).
+dreamTeam(Heroe,Equipo):-
+    permutation(Cadena, Equipo),
+    length(Cadena,IndUltimoElem),
+    nth1(IndUltimoElem, Cadena, Heroe),
+    esCadenaDeInspiracion(Cadena).
+    forall(
+        %Genero todos los miembros del equipo que no son el heroe            (
+        (
+            member(Miembro, Equipo),
+            Miembro\=Heroe
+        ),
+        %Verifico que hayan inspirado al heroe
+        inspiroAHeroe(Miembro, Heroe)
+     ).
+
+
 
 :- begin_tests(tpIntegrador, []).
 
@@ -716,15 +735,13 @@ todosSonAntecesoresDe(Heroe, Equipo):-
         not(esCadenaDeInspiracion([denken, frieren])),
         %Frieren → Fern → Frieren no es una cadena de inspiración válida ya que se repite 2 veces a un héroe
         not(esCadenaDeInspiracion([frieren, fern, frieren])).
-    /* 
     test("El equipo de los sueños de un heroe debe incluirlo a el y tambien a sus antecesores, que son heroes de alguna cadena de inspiracion en la cual todos lo inspiraron", nondet):-
         %Para Fern, Fern + Himmel es un dream team válido
-        equipoSoniadoDe(fern, [fern, himmel]),
+        dreamTeam(fern, [fern, himmel]),
         %También debe ser un dream team válido para Fern: Himmel + Fern. Es decir, debe ser válido sin importar el orden de los miembros en el equipo
-        equipoSoniadoDe(fern, [himmel, fern]),
+        dreamTeam(fern, [himmel, fern]),
         %Para Fern, Fern sola no es un dream team válido ya que no incluye ningún antecesor
-        not(equipoSoniadoDe(fern, [fern])),
+        not(dreamTeam(fern, [fern])),
         %Para Fern, Frieren sola no es un dream team válido ya que no se incluye a ella misma
-        not(equipoSoniadoDe(fern, [frieren])).
-       */ 
+        not(dreamTeam(fern, [frieren])).
 :- end_tests(tpIntegrador).
