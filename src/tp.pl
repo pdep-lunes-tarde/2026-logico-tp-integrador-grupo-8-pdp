@@ -554,35 +554,31 @@ seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevia
 
 
 dreamTeam(Heroe,Equipo):-
+
     /*
-        Dado un heroe y un equipo
-        el equipo es dream team del heroe si:
+
+    ACLARACION: Encontramos otra forma de hacerlo sin el append y que pase todos los tests.
+
+    Ejemplo de Funcionamiento:
+
+    Para dreamTeam(denken,  [denken, frieren, himmel, fern] ). :
         
-        existe una cadena de inspiracion valida tal que: El ultimo elemento es el heroe
+    1 - Genra una cadena de inspiracion en la linea 576
+    2 - En linea 578 y 579 me aseguro que la cadena tenga a denken en el ultimo eslabon
+    2 - En linea 581 me fijo que la cadena tenga los mismo elementos que el equipo, de caso  contrario podria tomarme [himmel -> frieren -> denken] como valido
+        Por propiedad de la permutacion, debe tener los mismos elementos que el equipo.
         
-        y el equipo es una permutacion de los elementos de dicha cadena:
-        - esto garantiza que TODOS los miembros pertenecen a la cadena
-        - y todos los miembros son antecesores del heroe
-    
+    3 -  De esta forma genera la cadena [himmel -> frieren -> fern -> denken] la cual es valida por lo tanto devuelve true
+
+
     */
+    
+    esCadenaDeInspiracion(Cadena),      %  Genero una Cadena de inspiracion valida
 
-    esCadenaDeInspiracion(Cadena), 
-
-    length(Cadena,IndUltimoElem),         
-    nth1(IndUltimoElem, Cadena, Heroe),
-
-    permutation(Cadena, Equipo).
-
-/*
-        CORRECIONES (Para antes de objetos 7/9):
-        - esPuebloChismoso y puebloViveTiempoSinPrecedente deben usar recuerdaHazania x
-        - dreamTeam sacar el forall que verifica que todos hayan inspirado al heroe de forma directa
-        - antes de usar permutation filtrar las cadenas para que sean solo las que terminan en el heroe (Tiene que ser el conjunto correcto)
-        - faltan tests de puebloChismoso x 
-        - faltan tests de casos borde de dreamTeam (buscar append/3)
-        - cambiar el nombre del test de pueblo musical
-
-*/
+    length(Cadena,IndUltimoElem),       %  
+    nth1(IndUltimoElem, Cadena, Heroe), %  Verifico que el ultimo elemento de la cadena sea el heroe, por lo tanto el resto del equipo son sus antecesores.
+    
+    permutation(Cadena, Equipo).        %  verifico que la cadena tenga los mismo miembros que el equipo, aunque el orden sea distinto(que sea una permutacion)
 
 :- begin_tests(tpIntegrador, []).
 
@@ -653,7 +649,7 @@ dreamTeam(Heroe,Equipo):-
         puebloQueMasLeeEnAnio(ende, 1400).
 
 
-    test("Un pueblo es musical si escucha mas hazanias cantadas que presenciadas o leidas", nondet):-
+    test("Un pueblo es musical si escucha mas hazanias escuchadas que por otro metodo", nondet):-
         esPuebloMusicalEnAnio(auberst, 1393),
         not(esPuebloMusicalEnAnio(weise, 1400)).
 
@@ -692,5 +688,7 @@ dreamTeam(Heroe,Equipo):-
         %Para Fern, Fern sola no es un dream team válido ya que no incluye ningún antecesor
         not(dreamTeam(fern, [fern])),
         %Para Fern, Frieren sola no es un dream team válido ya que no se incluye a ella misma
-        not(dreamTeam(fern, [frieren])).
+        not(dreamTeam(fern, [frieren])),
+        %Este equipo es valido porque existe la cadena himmel -> fern -> frieren -> denken
+        dreamTeam(denken, [denken, himmel, fern, frieren]).
 :- end_tests(tpIntegrador).
