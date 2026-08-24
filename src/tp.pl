@@ -1,4 +1,3 @@
-
 % punto 1
 
 % 1 - a
@@ -360,10 +359,7 @@ esConmemorada(
 
 esPueblo(Pueblo):-persona(_, Pueblo, _, _).
 
-
 esHazania(Hazania):-conocioHazania(_,_,_,hazania(Hazania, _, _)).
-
-esMetodo(Metodo):-conocioHazania(_,_,Metodo,hazania(_, _, _)).
 
 
 % I )
@@ -485,22 +481,16 @@ hazaniaEsImportanteEnPueblo(Pueblo,NombreHazania,Anio):-
     ).
 
 %   VII
-nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio):-
-    esPueblo(Pueblo),
-    esHazania(Hazania),
-
-    forall(
-        persona(Persona,Pueblo,_,_),                                          % Para toda persona del pueblo durante cierto anio
-        not(conocioHazania(Persona, Anio, presencio,hazania(Hazania,_,_)))    % ninguna de esas personas PRESENCIO la hazania
-        ).
-
 puebloViveTiempoSinPrecedente(Pueblo, Anio):-
     esPueblo(Pueblo),
 
     forall(
         hazaniaEsImportanteEnPueblo(Pueblo, Hazania, Anio),       % Para toda hazania importante de un pueblo durante un anio
-        not(nadieDelPuebloPresencioHazania(Hazania,Pueblo,Anio))  % Al menos uno la presencio
-        ).
+        (
+            persona(Persona,Pueblo,_,_),
+            conocioHazania(Persona, _, presencio,hazania(Hazania,_,_))
+        )
+    ).
 
 
 % punto 5
@@ -662,7 +652,7 @@ dreamTeam(Heroe,Equipo):-
         not(hazaniaEsImportanteEnPueblo(weise, recuperarGatoPerdido,1400)).
 
     test("Un pueblo vive tiempos sin precedentes si todas las hazanias importantes fueron presenciadas", nondet):-
-        puebloViveTiempoSinPrecedente(klares, 1390),
+        puebloViveTiempoSinPrecedente(klares, 1395),
         not(puebloViveTiempoSinPrecedente(weise, 1400)).
 
     test("Una persona es Heroe si participo enn una hazania conocida", nondet):-
