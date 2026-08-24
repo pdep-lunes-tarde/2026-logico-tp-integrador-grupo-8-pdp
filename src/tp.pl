@@ -555,9 +555,12 @@ dreamTeam(Heroe,Equipo):-
     %      EJ:  [H2 -> H3 -> H1]
     %      Ademas, todos los miembros del equipo deben haber inspirado al Heroe    
     %      inpiroHeroe(H2,H1) y inspiroHeroe(H3,H1)
+    
+    permutation(Cadena, Equipo),
+
     esCadenaDeInspiracion(Cadena),      %  existe una cadena de inpiracion valida tal que permutando sus elementos obtengo el equipo
 
-    permutation(Cadena, Equipo),        %  Genero una permutacion de los elementos de la cadena 
+                                        %  Genero una permutacion de los elementos de la cadena 
 
     length(Cadena,IndUltimoElem),       %  
     nth1(IndUltimoElem, Cadena, Heroe), %  Verifico que el ultimo elemento de la cadena sea el heroe
