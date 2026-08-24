@@ -465,8 +465,12 @@ esPuebloChismosoEnAnio(Pueblo,Anio):-
     esPueblo(Pueblo),
 
     forall(
-        (persona(Persona, Pueblo, _, _), conocioHazania(Persona, Anio, _,hazania(Hazania, _, _)) ),  % Para toda hazania conocida por alguien del pueblo
-        not(estaCorroborada(Hazania))                                                                % esa hazania no esta corroborrada
+        (   % Para toda hazania RECORDADA por alguien del pueblo en dicho Anio
+            persona(Persona, Pueblo, _, _), 
+            recuerdaHazania(Persona, Hazania, Anio)
+        ),  
+            % Dicha hazania no esta corroborrada
+            not(estaCorroborada(Hazania))
         ).  
   
 %   VI)
@@ -485,10 +489,12 @@ puebloViveTiempoSinPrecedente(Pueblo, Anio):-
     esPueblo(Pueblo),
 
     forall(
-        hazaniaEsImportanteEnPueblo(Pueblo, Hazania, Anio),       % Para toda hazania importante de un pueblo durante un anio
+        hazaniaEsImportanteEnPueblo(Pueblo, Hazania, Anio),       % Para toda hazania importante de un pueblo en un anio
         (
+            %Existe algun habitante que la recuerde porque la presencio
             persona(Persona,Pueblo,_,_),
-            conocioHazania(Persona, _, presencio,hazania(Hazania,_,_))
+            recuerdaHazania(Persona, Hazania, Anio),                    %   Debe recordarla en dicho anio (no pudo haber muerto y ya debe haber nacido) 
+            conocioHazania(Persona, _, presencio,hazania(Hazania,_,_))  %   La conoce porque la presencio
         )
     ).
 
@@ -548,34 +554,35 @@ seguirCadenaDeSinRepetir(Persona1, [Persona1 | CadenaDePersona2], PersonasPrevia
 
 
 dreamTeam(Heroe,Equipo):-
-    %
-    %      H1  [H2, H1, H3]
-    %      exite cadena de inspiracion tal que sea una permutacion de los miembros del equipo  
-    %      y H1 sea el ultimo elemento
-    %      EJ:  [H2 -> H3 -> H1]
-    %      Ademas, todos los miembros del equipo deben haber inspirado al Heroe    
-    %      inpiroHeroe(H2,H1) y inspiroHeroe(H3,H1)
+    /*
+        Dado un heroe y un equipo
+        el equipo es dream team del heroe si:
+        
+        existe una cadena de inspiracion valida tal que: El ultimo elemento es el heroe
+        
+        y el equipo es una permutacion de los elementos de dicha cadena:
+        - esto garantiza que TODOS los miembros pertenecen a la cadena
+        - y todos los miembros son antecesores del heroe
     
-    permutation(Cadena, Equipo),
+    */
 
-    esCadenaDeInspiracion(Cadena),      %  existe una cadena de inpiracion valida tal que permutando sus elementos obtengo el equipo
+    esCadenaDeInspiracion(Cadena), 
 
-                                        %  Genero una permutacion de los elementos de la cadena 
+    length(Cadena,IndUltimoElem),         
+    nth1(IndUltimoElem, Cadena, Heroe),
 
-    length(Cadena,IndUltimoElem),       %  
-    nth1(IndUltimoElem, Cadena, Heroe), %  Verifico que el ultimo elemento de la cadena sea el heroe
+    permutation(Cadena, Equipo).
 
-    forall(                             %  Verfico que todo el equipo haya inspirado al heroe
-        %Genero todos los miembros del equipo que no son el heroe            (
-        (
-            member(Miembro, Equipo),
-            Miembro\=Heroe
-        ),
-        %Verifico que hayan inspirado al heroe
-        inspiroAHeroe(Miembro, Heroe)
-     ).
+/*
+        CORRECIONES (Para antes de objetos 7/9):
+        - esPuebloChismoso y puebloViveTiempoSinPrecedente deben usar recuerdaHazania x
+        - dreamTeam sacar el forall que verifica que todos hayan inspirado al heroe de forma directa
+        - antes de usar permutation filtrar las cadenas para que sean solo las que terminan en el heroe (Tiene que ser el conjunto correcto)
+        - faltan tests de puebloChismoso x 
+        - faltan tests de casos borde de dreamTeam (buscar append/3)
+        - cambiar el nombre del test de pueblo musical
 
-
+*/
 
 :- begin_tests(tpIntegrador, []).
 
@@ -649,6 +656,10 @@ dreamTeam(Heroe,Equipo):-
     test("Un pueblo es musical si escucha mas hazanias cantadas que presenciadas o leidas", nondet):-
         esPuebloMusicalEnAnio(auberst, 1393),
         not(esPuebloMusicalEnAnio(weise, 1400)).
+
+    test("Un pueblo es chismoso cuando ninguna de las hazañas que se recuerdan en ese pueblo está corroborada", nondet):-
+        esPuebloChismosoEnAnio(ende, 1420),
+        not(esPuebloChismosoEnAnio(weise, 1400)).
 
     test("Una hazania es importante en un pueblo si todas las personas que viven alli la recuerdan", nondet):-
         hazaniaEsImportanteEnPueblo(weise, destruirReyDemonio, 1400),
